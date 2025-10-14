@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.example"
+    namespace = "com.isynclouds.syncn"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.example"
+        applicationId = "com.isynclouds.syncn"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -45,7 +45,12 @@ flutter {
 
 
 dependencies {
-     // Tuya Home SDK Core (ensure version matches your downloaded SDK, e.g., 6.2.2)
+    // Exclude commons-io from all configurations
+    configurations.all {
+        exclude(group = "commons-io", module = "commons-io")
+    }
+    
+    // Tuya Home SDK Core (ensure version matches your downloaded SDK, e.g., 6.2.2)
     implementation("com.thingclips.smart:thingsmart:6.2.2")
 
   // Tuya BizBundles BOM (aligns all BizBundles to version 6.2.16)

@@ -1,4 +1,4 @@
-package com.example.example
+package com.isynclouds.syncn
 
 import android.app.Application
         import com.facebook.drawee.backends.pipeline.Fresco

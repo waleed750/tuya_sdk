@@ -1,9 +1,11 @@
 import 'dart:developer';
 
+import 'package:example/tuya_configuration.dart';
 import 'package:flutter/material.dart';
 import 'package:tuya_flutter_ha_sdk/tuya_flutter_ha_sdk.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   try {
     await TuyaFlutterHaSdk.tuyaSdkInit(
       androidKey: TuyaConfig.androidAppKey,
@@ -135,12 +137,4 @@ class _MyHomePageState extends State<MyHomePage> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
-}
-
-class TuyaConfig {
-  static const String androidAppKey = 'Your Android AppKey';
-  static const String androidAppSecret = 'Your Android AppSecret';
-
-  static const String iosAppKey = 'Your iOS AppKey';
-  static const String iosAppSecret = 'Your iOS AppSecret';
 }

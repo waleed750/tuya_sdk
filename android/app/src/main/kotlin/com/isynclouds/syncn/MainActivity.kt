@@ -1,4 +1,4 @@
-package com.example.example
+package com.isynclouds.syncn
 
 import io.flutter.embedding.android.FlutterActivity
 
