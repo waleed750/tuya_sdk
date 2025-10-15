@@ -71,10 +71,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       // Attempt to login with Tuya SDK
-      final result = await TuyaFlutterHaSdk.loginWithUid(
-        countryCode:
-            '1', // Default to US, you might want to make this configurable
-        uid: _emailController.text,
+      Map<String, dynamic> result = await TuyaFlutterHaSdk.loginWithEmail(
+        email: _emailController.text,
+        countryCode: '+1',
         password: _passwordController.text,
       );
 

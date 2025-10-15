@@ -38,6 +38,10 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
   /// Login (or register) with UID.
   /// [countryCode],[uid],[password],[createHome] details are passed on to the native
   Future<Map<String, dynamic>> loginWithUid({required String countryCode, required String uid, required String password, required bool createHome});
+  
+  /// Login with email.
+  /// [countryCode],[email],[password],[createHome] details are passed on to the native
+  Future<Map<String, dynamic>> loginWithEmail({required String countryCode, required String email, required String password, required bool createHome});
 
   /// Checks if any user is logged in currently.
   /// returns true if logged in and false if not logged in

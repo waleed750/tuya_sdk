@@ -241,6 +241,39 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                         }
                 );
                 break;
+                
+            case "loginWithEmail":
+                // loginByEmail function of the Tuya SDK is called with the passed on data
+                String emailCountryCode = call.argument("countryCode");
+                String email = call.argument("email");
+                String emailPassword = call.argument("password");
+                Boolean emailCreateHome = call.argument("createHome");
+                if (emailCountryCode == null || email == null || emailPassword == null || emailCreateHome == null) {
+                    result.error("MISSING_ARGS", "countryCode, email, password, createHome required", null);
+                    return;
+                }
+                Log.i("EMAIL", email);
+                // Invoke loginByEmail on ThingHomeSdk.getUserInstance()
+                ThingHomeSdk.getUserInstance().loginWithEmail(
+                        emailCountryCode,
+                        email,
+                        emailPassword,
+                        new ILoginCallback() {
+                            @Override
+                            public void onSuccess(User user) {
+                                Map<String, Object> resp = new HashMap<>();
+                                resp.put("email", user.getEmail());
+                                resp.put("uid", user.getUid());
+                                result.success(resp);
+                            }
+
+                            @Override
+                            public void onError(String code, String error) {
+                                result.error("LOGIN_FAILED", error + " (code: " + code + ")", null);
+                            }
+                        }
+                );
+                break;
             case "checkLogin":
                 // return the value of isLogin of the user instance of Tuya SDK
                 result.success(ThingHomeSdk.getUserInstance().isLogin());

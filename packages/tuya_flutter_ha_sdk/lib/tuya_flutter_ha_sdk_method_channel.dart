@@ -7,7 +7,8 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// The MethodChannel used to talk to the native side.
   @visibleForTesting
   final MethodChannel methodChannel = const MethodChannel(
-      'tuya_flutter_ha_sdk');
+    'tuya_flutter_ha_sdk',
+  );
 
   // ──────────────────────────────────────────────────────────────────────────────
   // Core SDK
@@ -25,12 +26,12 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   Future<void> tuyaSdkInit({
     required String appKey,
     required String appSecret,
-    required bool isDebug
+    required bool isDebug,
   }) async {
     await methodChannel.invokeMethod<void>('tuyaSdkInit', <String, dynamic>{
       'appKey': appKey,
       'appSecret': appSecret,
-      'isDebug':isDebug
+      'isDebug': isDebug,
     });
   }
 
@@ -48,15 +49,37 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
     required String password,
     required bool createHome,
   }) async {
-    final Map<dynamic, dynamic> result =
-    await methodChannel.invokeMethod('loginWithUid', <String, dynamic>{
-      'countryCode': countryCode,
-      'uid': uid,
-      'password': password,
-      'createHome': createHome,
-    });
+    final Map<dynamic, dynamic> result = await methodChannel
+        .invokeMethod('loginWithUid', <String, dynamic>{
+          'countryCode': countryCode,
+          'uid': uid,
+          'password': password,
+          'createHome': createHome,
+        });
     return Map<String, dynamic>.from(result);
   }
+
+  /// Login with email.
+  /// [countryCode],[email],[password],[createHome] details are passed on to the native
+  /// loginWithEmail function on the native side is invoked
+  @override
+  Future<Map<String, dynamic>> loginWithEmail({
+    required String countryCode,
+    required String email,
+    required String password,
+    required bool createHome,
+  }) async {
+    final Map<dynamic, dynamic> result = await methodChannel
+        .invokeMethod('loginWithEmail', <String, dynamic>{
+          'countryCode': countryCode,
+          'email': email,
+          'password': password,
+          'createHome': createHome,
+        });
+    return Map<String, dynamic>.from(result);
+  }
+
+  /// Login with email.
 
   /// Checks if any user is logged in currently.
   /// checkLogin function on the native side is invoked
@@ -71,8 +94,9 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// returns a map with all the user details
   @override
   Future<Map<String, dynamic>> getCurrentUser() async {
-    final Map<dynamic, dynamic> result =
-    await methodChannel.invokeMethod('getCurrentUser');
+    final Map<dynamic, dynamic> result = await methodChannel.invokeMethod(
+      'getCurrentUser',
+    );
     return Map<String, dynamic>.from(result);
   }
 
@@ -136,18 +160,18 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
     double? latitude,
     double? longitude,
   }) async {
-    geoName??="";
-    rooms??=[];
-    latitude??=0.0;
-    longitude??=0.0;
-    final int? result =
-    await methodChannel.invokeMethod<int>('createHome', <String, dynamic>{
-      'name': name,
-      'geoName': geoName,
-      'rooms': rooms,
-      'latitude': latitude,
-      'longitude': longitude,
-    });
+    geoName ??= "";
+    rooms ??= [];
+    latitude ??= 0.0;
+    longitude ??= 0.0;
+    final int? result = await methodChannel
+        .invokeMethod<int>('createHome', <String, dynamic>{
+          'name': name,
+          'geoName': geoName,
+          'rooms': rooms,
+          'latitude': latitude,
+          'longitude': longitude,
+        });
     return result ?? 0;
   }
 
@@ -156,8 +180,9 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// returns the list of homes
   @override
   Future<List<Map<String, dynamic>>> getHomeList() async {
-    final List<dynamic>? list =
-    await methodChannel.invokeMethod<List<dynamic>>('getHomeList');
+    final List<dynamic>? list = await methodChannel.invokeMethod<List<dynamic>>(
+      'getHomeList',
+    );
     return (list ?? []).map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
@@ -196,12 +221,15 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// getHomeDevices function of native is invoked
   /// returns the list of devices
   @override
-  Future<List<Map<String, dynamic>>> getHomeDevices({required int homeId}) async {
+  Future<List<Map<String, dynamic>>> getHomeDevices({
+    required int homeId,
+  }) async {
     final result = await methodChannel.invokeMethod<List<dynamic>>(
       'getHomeDevices',
       {'homeId': homeId},
     );
-    return result?.map((e) => Map<String, dynamic>.from(e as Map)).toList() ?? [];
+    return result?.map((e) => Map<String, dynamic>.from(e as Map)).toList() ??
+        [];
   }
 
   // ──────────────────────────────────────────────────────────────────────────────
@@ -237,9 +265,9 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   @override
   Future<String?> getToken({required int homeId}) async {
     return await methodChannel.invokeMethod<String>(
-        'getToken', <String, dynamic>{
-      'homeId': homeId,
-    });
+      'getToken',
+      <String, dynamic>{'homeId': homeId},
+    );
   }
 
   /// Starts EZ or AP Wi-Fi pairing.
@@ -316,27 +344,26 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// pairBleDevice function on native is invoked
   /// Returns a JSON map
   @override
-  Future<Map<String,dynamic>?> pairBleDevice({
+  Future<Map<String, dynamic>?> pairBleDevice({
     required String uuid,
     required String productId,
     required int homeId,
     int? deviceType,
     String? address,
     int? flag,
-    int? timeout
+    int? timeout,
   }) async {
-    final Map<dynamic, dynamic> result =
-    await methodChannel.invokeMethod('pairBleDevice', <String, dynamic>{
-      'uuid': uuid,
-      'productId': productId,
-      'homeId': homeId,
-      'deviceType':deviceType,
-      'address':address,
-      'flag': flag,
-      'timeout':timeout
-    });
+    final Map<dynamic, dynamic> result = await methodChannel
+        .invokeMethod('pairBleDevice', <String, dynamic>{
+          'uuid': uuid,
+          'productId': productId,
+          'homeId': homeId,
+          'deviceType': deviceType,
+          'address': address,
+          'flag': flag,
+          'timeout': timeout,
+        });
     return Map<String, dynamic>.from(result);
-
   }
 
   /// Start combo (BLE→Wi-Fi) pairing for a device.
@@ -344,31 +371,31 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// startComboPairing function of native is invoked
   /// returns a JSON map
   @override
-  Future<Map<String,dynamic>?> startComboPairing({
+  Future<Map<String, dynamic>?> startComboPairing({
     required String uuid,
     required String productId,
     required int homeId,
     required String ssid,
     required String password,
     int? timeout,
-    int? deviceType,String? address,
+    int? deviceType,
+    String? address,
     String? token,
-    int? flag
+    int? flag,
   }) async {
-    final Map<dynamic, dynamic> result =
-    await methodChannel.invokeMethod(
-        'startComboPairing', <String, dynamic>{
-      'uuid': uuid,
-      'productId': productId,
-      'homeId': homeId,
-      'ssid': ssid,
-      'password': password,
-      'timeout': timeout,
-      'deviceType':deviceType,
-      'address':address,
-      'token':token,
-      'flag':flag
-    });
+    final Map<dynamic, dynamic> result = await methodChannel
+        .invokeMethod('startComboPairing', <String, dynamic>{
+          'uuid': uuid,
+          'productId': productId,
+          'homeId': homeId,
+          'ssid': ssid,
+          'password': password,
+          'timeout': timeout,
+          'deviceType': deviceType,
+          'address': address,
+          'token': token,
+          'flag': flag,
+        });
     return Map<String, dynamic>.from(result);
   }
 
@@ -377,8 +404,8 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// initDevice function on native is invoked
   @override
   Future<void> initDevice({required String devId}) async {
-    await methodChannel.invokeMethod<void>("initDevice",<String,dynamic>{
-      'devId':devId
+    await methodChannel.invokeMethod<void>("initDevice", <String, dynamic>{
+      'devId': devId,
     });
   }
 
@@ -386,21 +413,27 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// [devId],[dps] details are passed on to native
   /// queryDeviceInfo function of native is invoked
   @override
-  Future<Map<String, dynamic>?> queryDeviceInfo({required String devId,List<String>? dps}) async {
-    return await methodChannel.invokeMethod<Map<String, dynamic>>("queryDeviceInfo",<String,dynamic>{
-      'devId':devId,
-      'dps':dps
-    });
+  Future<Map<String, dynamic>?> queryDeviceInfo({
+    required String devId,
+    List<String>? dps,
+  }) async {
+    return await methodChannel.invokeMethod<Map<String, dynamic>>(
+      "queryDeviceInfo",
+      <String, dynamic>{'devId': devId, 'dps': dps},
+    );
   }
 
   /// Rename a specific device
   /// [devId],[name] details are passed on to native
   /// renameDevice function of native is invoked
   @override
-  Future<void> renameDevice({required String devId, required String name}) async {
-    await methodChannel.invokeMethod<void>("renameDevice",<String,dynamic>{
-      'devId':devId,
-      'name':name
+  Future<void> renameDevice({
+    required String devId,
+    required String name,
+  }) async {
+    await methodChannel.invokeMethod<void>("renameDevice", <String, dynamic>{
+      'devId': devId,
+      'name': name,
     });
   }
 
@@ -409,8 +442,8 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// removeDevice function of native is invoked
   @override
   Future<void> removeDevice({required String devId}) async {
-    await methodChannel.invokeMethod<void>("removeDevice",<String,dynamic>{
-      'devId':devId
+    await methodChannel.invokeMethod<void>("removeDevice", <String, dynamic>{
+      'devId': devId,
     });
   }
 
@@ -419,9 +452,10 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// restoreFactoryDefaults function of native is invoked
   @override
   Future<void> restoreFactoryDefaults({required String devId}) async {
-    await methodChannel.invokeMethod<void>("restoreFactoryDefaults",<String,dynamic>{
-      'devId':devId
-    });
+    await methodChannel.invokeMethod<void>(
+      "restoreFactoryDefaults",
+      <String, dynamic>{'devId': devId},
+    );
   }
 
   /// Get the signal strength of a specific device
@@ -431,9 +465,9 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   @override
   Future<String?> queryDeviceWiFiStrength({required String devId}) async {
     return await methodChannel.invokeMethod<String>(
-        'queryDeviceWiFiStrength', <String, dynamic>{
-      'devId': devId,
-    });
+      'queryDeviceWiFiStrength',
+      <String, dynamic>{'devId': devId},
+    );
   }
 
   /// Query details of any sub devices
@@ -441,21 +475,28 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// querySubDeviceList function of native is invoked
   /// returns a JSON map
   @override
-  Future<Map<String, dynamic>?> querySubDeviceList({required String devId}) async {
-    return await methodChannel.invokeMethod<Map<String, dynamic>>("querySubDeviceList",<String,dynamic>{
-      'devId':devId
-    });
+  Future<Map<String, dynamic>?> querySubDeviceList({
+    required String devId,
+  }) async {
+    return await methodChannel.invokeMethod<Map<String, dynamic>>(
+      "querySubDeviceList",
+      <String, dynamic>{'devId': devId},
+    );
   }
 
   /// Add a given device to a room
   /// [homeId],[roomId],[devId] details are passed on to native
   /// addDeviceToRoom function of native is invoked
   @override
-  Future<void> addDeviceToRoom({required int homeId,required int roomId, required String devId}) async {
-    await methodChannel.invokeMethod<void>("addDeviceToRoom",<String,dynamic>{
-      'homeId':homeId,
-      'roomId':roomId,
-      'devId':devId
+  Future<void> addDeviceToRoom({
+    required int homeId,
+    required int roomId,
+    required String devId,
+  }) async {
+    await methodChannel.invokeMethod<void>("addDeviceToRoom", <String, dynamic>{
+      'homeId': homeId,
+      'roomId': roomId,
+      'devId': devId,
     });
   }
 
@@ -463,11 +504,15 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// [homeId],[roomId],[groupId] details are passed on to native
   /// addGroupToRoom function of native is invoked
   @override
-  Future<void> addGroupToRoom({required int homeId,required int roomId, required int groupId}) async {
-    await methodChannel.invokeMethod<void>("addGroupToRoom",<String,dynamic>{
-      'homeId':homeId,
-      'roomId':roomId,
-      'groupId':groupId
+  Future<void> addGroupToRoom({
+    required int homeId,
+    required int roomId,
+    required int groupId,
+  }) async {
+    await methodChannel.invokeMethod<void>("addGroupToRoom", <String, dynamic>{
+      'homeId': homeId,
+      'roomId': roomId,
+      'groupId': groupId,
     });
   }
 
@@ -476,10 +521,11 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// getRoomList function of native is invoked
   /// returns JSON map
   @override
-  Future<List<Map<String,dynamic>>?> getRoomList({required int homeId}) async {
-    final List<dynamic>? list = await methodChannel.invokeMethod<List<dynamic>?>("getRoomList",<String,dynamic>{
-      'homeId':homeId
-    });
+  Future<List<Map<String, dynamic>>?> getRoomList({required int homeId}) async {
+    final List<dynamic>? list = await methodChannel
+        .invokeMethod<List<dynamic>?>("getRoomList", <String, dynamic>{
+          'homeId': homeId,
+        });
     return list?.map((e) => Map<String, dynamic>.from(e as Map)).toList() ?? [];
   }
 
@@ -488,9 +534,9 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// addRoom function of native is invoked
   @override
   Future<void> addRoom({required int homeId, required String roomName}) async {
-    await methodChannel.invokeMethod<void>("addRoom",<String,dynamic>{
-      'homeId':homeId,
-      'roomName':roomName
+    await methodChannel.invokeMethod<void>("addRoom", <String, dynamic>{
+      'homeId': homeId,
+      'roomName': roomName,
     });
   }
 
@@ -498,24 +544,30 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// [homeId],[roomId],[devId] details are passed on to native
   /// removeDeviceFromRoom function on native is invoked
   @override
-  Future<void> removeDeviceFromRoom({required int homeId,required int roomId, required String devId}) async {
-    await methodChannel.invokeMethod<void>("removeDeviceFromRoom",<String,dynamic>{
-      'homeId':homeId,
-      'roomId':roomId,
-      'devId':devId
-    });
+  Future<void> removeDeviceFromRoom({
+    required int homeId,
+    required int roomId,
+    required String devId,
+  }) async {
+    await methodChannel.invokeMethod<void>(
+      "removeDeviceFromRoom",
+      <String, dynamic>{'homeId': homeId, 'roomId': roomId, 'devId': devId},
+    );
   }
 
   /// Remove a group from a given room
   /// [homeId],[roomId],[groupId] details are passed on to native
   /// removeGroupFromRoom function of native is invoked
   @override
-  Future<void> removeGroupFromRoom({required int homeId,required int roomId, required int groupId}) async {
-    await methodChannel.invokeMethod<void>("removeGroupFromRoom",<String,dynamic>{
-      'homeId':homeId,
-      'roomId':roomId,
-      'groupId':groupId
-    });
+  Future<void> removeGroupFromRoom({
+    required int homeId,
+    required int roomId,
+    required int groupId,
+  }) async {
+    await methodChannel.invokeMethod<void>(
+      "removeGroupFromRoom",
+      <String, dynamic>{'homeId': homeId, 'roomId': roomId, 'groupId': groupId},
+    );
   }
 
   /// Remove room from a home
@@ -523,9 +575,9 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// removeRoom function of native is invoked
   @override
   Future<void> removeRoom({required int homeId, required int roomId}) async {
-    await methodChannel.invokeMethod<void>("removeRoom",<String,dynamic>{
-      'homeId':homeId,
-      'roomId':roomId
+    await methodChannel.invokeMethod<void>("removeRoom", <String, dynamic>{
+      'homeId': homeId,
+      'roomId': roomId,
     });
   }
 
@@ -533,10 +585,13 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// [homeId],[roomIds] details are passed on to native
   /// sortRooms function of native is invoked
   @override
-  Future<void> sortRooms({required int homeId, required List<int> roomIds}) async {
-    await methodChannel.invokeMethod<void>("sortRooms",<String,dynamic>{
-      'homeId':homeId,
-      'roomIds':roomIds
+  Future<void> sortRooms({
+    required int homeId,
+    required List<int> roomIds,
+  }) async {
+    await methodChannel.invokeMethod<void>("sortRooms", <String, dynamic>{
+      'homeId': homeId,
+      'roomIds': roomIds,
     });
   }
 
@@ -544,11 +599,15 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// [homeId],[roomId],[roomName] details are passed on to native
   /// updateRoomName function of native is invoked
   @override
-  Future<void> updateRoomName({required int homeId,required int roomId, required String roomName}) async {
-    await methodChannel.invokeMethod<void>("updateRoomName",<String,dynamic>{
-      'homeId':homeId,
-      'roomId':roomId,
-      'roomName':roomName
+  Future<void> updateRoomName({
+    required int homeId,
+    required int roomId,
+    required String roomName,
+  }) async {
+    await methodChannel.invokeMethod<void>("updateRoomName", <String, dynamic>{
+      'homeId': homeId,
+      'roomId': roomId,
+      'roomName': roomName,
     });
   }
 
@@ -557,7 +616,7 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// unlockBLELock function of native is invoked
   @override
   Future<void> unlockBLELock({required String devId}) async {
-    await methodChannel.invokeMethod("unlockBLELock",<String, dynamic>{
+    await methodChannel.invokeMethod("unlockBLELock", <String, dynamic>{
       'devId': devId,
     });
   }
@@ -567,7 +626,7 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// lockBLELock function of native is invoked
   @override
   Future<void> lockBLELock({required String devId}) async {
-    await methodChannel.invokeMethod("lockBLELock",<String, dynamic>{
+    await methodChannel.invokeMethod("lockBLELock", <String, dynamic>{
       'devId': devId,
     });
   }
@@ -576,10 +635,13 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// [devId],[open] details are passed on to native
   /// unlockWifiLock function of native is invoked
   @override
-  Future<void> unlockWifiLock({required String devId,required bool open}) async {
-    await methodChannel.invokeMethod("unlockWifiLock",<String, dynamic>{
+  Future<void> unlockWifiLock({
+    required String devId,
+    required bool open,
+  }) async {
+    await methodChannel.invokeMethod("unlockWifiLock", <String, dynamic>{
       'devId': devId,
-      'allow':open
+      'allow': open,
     });
   }
 
@@ -588,10 +650,10 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// dynamicWifiLockPassword function of native is invoked
   @override
   Future<String> dynamicWifiLockPassword({required String devId}) async {
-    String? result= await methodChannel.invokeMethod<String>(
-        'dynamicWifiLockPassword', <String, dynamic>{
-      'devId': devId,
-    });
+    String? result = await methodChannel.invokeMethod<String>(
+      'dynamicWifiLockPassword',
+      <String, dynamic>{'devId': devId},
+    );
     return result ?? "";
   }
 
@@ -600,9 +662,10 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// checkIfMatter function of native is invoked
   @override
   Future<bool> checkIfMatter({required String devId}) async {
-    bool result= await methodChannel.invokeMethod("checkIfMatter",<String,dynamic>{
-      'devId':devId
-    });
+    bool result = await methodChannel.invokeMethod(
+      "checkIfMatter",
+      <String, dynamic>{'devId': devId},
+    );
     return result;
   }
 
@@ -610,10 +673,13 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// [devId],[dps] details are passed on to native
   /// controlMatter function of native is invoked
   @override
-  Future<void> controlMatter({required String devId, required Map<String, dynamic> dps}) async {
-    await methodChannel.invokeMethod("controlMatter",<String,dynamic>{
-      'devId':devId,
-      'dps':dps
+  Future<void> controlMatter({
+    required String devId,
+    required Map<String, dynamic> dps,
+  }) async {
+    await methodChannel.invokeMethod("controlMatter", <String, dynamic>{
+      'devId': devId,
+      'dps': dps,
     });
   }
 }

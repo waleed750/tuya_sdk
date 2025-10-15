@@ -101,6 +101,36 @@ public class TuyaFlutterHaSdkPlugin: NSObject, FlutterPlugin {
                     let msg = error?.localizedDescription ?? "Unknown error"
                     result(FlutterError(code: "LOGIN_FAILED", message: msg, details: nil))
                 }
+                    
+        case "loginWithEmail":
+            // login with email function of the Tuya SDK
+            guard
+                let args = call.arguments as? [String: Any],
+                let countryCode = args["countryCode"] as? String,
+                let email       = args["email"] as? String,
+                let password    = args["password"] as? String,
+                let createHome  = args["createHome"] as? Bool
+            else {
+                result(FlutterError(code: "MISSING_ARGS",
+                                    message: "countryCode, email, password, createHome required",
+                                    details: nil))
+                return
+            }
+            ThingSmartUser.sharedInstance().login(
+                byEmail: email,
+                countryCode: countryCode,
+                password: password,
+                createHome: createHome,
+                success: { userId in 
+                    result([
+                        "uid": userId,
+                        "email": email
+                    ])
+                },
+                failure: { error in
+                    let msg = error?.localizedDescription ?? "Unknown error"
+                    result(FlutterError(code: "LOGIN_FAILED", message: msg, details: nil))
+                }
             )
             
         case "checkLogin":

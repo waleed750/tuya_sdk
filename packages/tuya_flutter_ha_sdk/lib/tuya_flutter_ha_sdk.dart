@@ -39,20 +39,40 @@ class TuyaFlutterHaSdk {
   }) {
     if (Platform.isAndroid) {
       if (androidKey.isEmpty || androidKey.contains(" ")) {
-        throw PlatformException(code: "INVALID_PARAMETER", message: "AppKey can't be empty or contains whitespaces");
+        throw PlatformException(
+          code: "INVALID_PARAMETER",
+          message: "AppKey can't be empty or contains whitespaces",
+        );
       }
       if (androidSecret.isEmpty || androidSecret.contains(" ")) {
-        throw PlatformException(code: "INVALID_PARAMETER", message: "AppSecret can't be empty or contains whitespaces");
+        throw PlatformException(
+          code: "INVALID_PARAMETER",
+          message: "AppSecret can't be empty or contains whitespaces",
+        );
       }
-      return TuyaFlutterHaSdkPlatform.instance.tuyaSdkInit(appKey: androidKey, appSecret: androidSecret, isDebug: isDebug);
+      return TuyaFlutterHaSdkPlatform.instance.tuyaSdkInit(
+        appKey: androidKey,
+        appSecret: androidSecret,
+        isDebug: isDebug,
+      );
     } else if (Platform.isIOS) {
       if (iosKey.isEmpty || iosKey.contains(" ")) {
-        throw PlatformException(code: "INVALID_PARAMETER", message: "AppKey can't be empty or contains whitespaces");
+        throw PlatformException(
+          code: "INVALID_PARAMETER",
+          message: "AppKey can't be empty or contains whitespaces",
+        );
       }
       if (iosSecret.isEmpty || iosSecret.contains(" ")) {
-        throw PlatformException(code: "INVALID_PARAMETER", message: "AppSecret can't be empty or contains whitespaces");
+        throw PlatformException(
+          code: "INVALID_PARAMETER",
+          message: "AppSecret can't be empty or contains whitespaces",
+        );
       }
-      return TuyaFlutterHaSdkPlatform.instance.tuyaSdkInit(appKey: iosKey, appSecret: iosSecret, isDebug: isDebug);
+      return TuyaFlutterHaSdkPlatform.instance.tuyaSdkInit(
+        appKey: iosKey,
+        appSecret: iosSecret,
+        isDebug: isDebug,
+      );
     } else {
       throw UnsupportedError('Tuya SDK is only supported on Android and iOS');
     }
@@ -84,15 +104,77 @@ class TuyaFlutterHaSdk {
     bool createHome = true,
   }) {
     if (countryCode.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "countryCode cannot be empty");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "countryCode cannot be empty",
+      );
     }
     if (uid.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "uid cannot be empty");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "uid cannot be empty",
+      );
     }
     if (password.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "password cannot be empty");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "password cannot be empty",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.loginWithUid(countryCode: countryCode, uid: uid, password: password, createHome: createHome);
+    return TuyaFlutterHaSdkPlatform.instance.loginWithUid(
+      countryCode: countryCode,
+      uid: uid,
+      password: password,
+      createHome: createHome,
+    );
+  }
+
+  /// Login with email and password.
+  ///
+  /// The [email] parameter is the email address of the user.
+  /// The [password] parameter is the password for the account.
+  /// The [countryCode] parameter is the country code (e.g., "1" for US).
+  /// The [createHome] parameter determines whether to create a home after login.
+  ///
+  /// Returns a Map containing user information on success.
+  ///
+  /// Example Usage:
+  /// ```dart
+  /// Map<String,dynamic> success = await loginWithEmail(email: 'user@example.com', countryCode: '1', password: 'password123');
+  /// print(success);
+  /// ```
+  ///
+  /// Throws [PlatformException] on failure.
+  static Future<Map<String, dynamic>> loginWithEmail({
+    required String countryCode,
+    required String email,
+    required String password,
+    bool createHome = true,
+  }) {
+    if (countryCode.isEmpty) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "countryCode cannot be empty",
+      );
+    }
+    if (email.isEmpty) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "email cannot be empty",
+      );
+    }
+    if (password.isEmpty) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "password cannot be empty",
+      );
+    }
+    return TuyaFlutterHaSdkPlatform.instance.loginWithEmail(
+      countryCode: countryCode,
+      email: email,
+      password: password,
+      createHome: createHome,
+    );
   }
 
   /// Checks if any user is logged in currently.
@@ -166,9 +248,14 @@ class TuyaFlutterHaSdk {
   /// ```
   static Future<void> updateTimeZone({required String timeZoneId}) {
     if (timeZoneId.isEmpty || timeZoneId.contains(" ")) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "Time Zone ID can't be empty or contains whitespaces");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "Time Zone ID can't be empty or contains whitespaces",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.updateTimeZone(timeZoneId: timeZoneId);
+    return TuyaFlutterHaSdkPlatform.instance.updateTimeZone(
+      timeZoneId: timeZoneId,
+    );
   }
 
   /// Changes the user’s preferred temperature unit.
@@ -184,7 +271,10 @@ class TuyaFlutterHaSdk {
   /// ```
   static Future<void> updateTempUnit({required int tempUnit}) {
     if (tempUnit != 1 && tempUnit != 2) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "Temp Unit should be either 1 (°C) or 2 (°F)");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "Temp Unit should be either 1 (°C) or 2 (°F)",
+      );
     }
     return TuyaFlutterHaSdkPlatform.instance.updateTempUnit(tempUnit: tempUnit);
   }
@@ -202,7 +292,10 @@ class TuyaFlutterHaSdk {
   /// ```
   static Future<void> updateNickname({required String nickname}) {
     if (nickname.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "nickname cannot be empty");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "nickname cannot be empty",
+      );
     }
     return TuyaFlutterHaSdkPlatform.instance.updateNickname(nickname: nickname);
   }
@@ -247,7 +340,10 @@ class TuyaFlutterHaSdk {
     double? longitude,
   }) {
     if (name.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "name cannot be empty");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "name cannot be empty",
+      );
     }
     return TuyaFlutterHaSdkPlatform.instance.createHome(
       name: name,
@@ -302,19 +398,31 @@ class TuyaFlutterHaSdk {
   ///
   /// ```
   /// Throws [PlatformException] on failure.
-  static Future<void> updateHomeInfo({required int homeId, required String homeName, String? geoName, double? latitude, double? longitude}) {
-    if (homeId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "homeId should be specified");
+  static Future<void> updateHomeInfo({
+    required int homeId,
+    required String homeName,
+    String? geoName,
+    double? latitude,
+    double? longitude,
+  }) {
+    if (homeId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeId should be specified",
+      );
     }
     if (homeName.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "homeName cannot be empty");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeName cannot be empty",
+      );
     }
     return TuyaFlutterHaSdkPlatform.instance.updateHomeInfo(
       homeId: homeId,
       homeName: homeName,
       geoName: geoName,
       latitude: latitude,
-      longitude: longitude
+      longitude: longitude,
     );
   }
 
@@ -327,8 +435,11 @@ class TuyaFlutterHaSdk {
   ///
   /// Throws [PlatformException] on failure.
   static Future<void> deleteHome({required int homeId}) {
-    if (homeId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "homeId should be specified");
+    if (homeId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeId should be specified",
+      );
     }
     return TuyaFlutterHaSdkPlatform.instance.deleteHome(homeId: homeId);
   }
@@ -345,9 +456,14 @@ class TuyaFlutterHaSdk {
   ///
   /// Returns a map with details of the devices
   /// Throws [PlatformException] on failure.
-  static Future<List<Map<String, dynamic>>> getHomeDevices({required int homeId}) {
-    if (homeId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "homeId should be specified");
+  static Future<List<Map<String, dynamic>>> getHomeDevices({
+    required int homeId,
+  }) {
+    if (homeId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeId should be specified",
+      );
     }
     return TuyaFlutterHaSdkPlatform.instance.getHomeDevices(homeId: homeId);
   }
@@ -357,10 +473,13 @@ class TuyaFlutterHaSdk {
   // ──────────────────────────────────────────────────────────────────────────────
 
   /// Stream of low-level pairing events (onPairingSuccess, onPairingError, etc.).
-  static const EventChannel _pairingEventChannel = EventChannel('tuya_flutter_ha_sdk/pairingEvents');
-  static Stream<Map<String, dynamic>> pairingEvents = _pairingEventChannel.receiveBroadcastStream().cast<Map<dynamic, dynamic>>().map(
-    (e) => Map<String, dynamic>.from(e),
+  static const EventChannel _pairingEventChannel = EventChannel(
+    'tuya_flutter_ha_sdk/pairingEvents',
   );
+  static Stream<Map<String, dynamic>> pairingEvents = _pairingEventChannel
+      .receiveBroadcastStream()
+      .cast<Map<dynamic, dynamic>>()
+      .map((e) => Map<String, dynamic>.from(e));
 
   /// Get the current Wi-Fi SSID.
   ///
@@ -376,8 +495,14 @@ class TuyaFlutterHaSdk {
   }
 
   /// Update the user’s location for pairing (latitude, longitude).
-  static Future<void> updateLocation({required double latitude, required double longitude}) {
-    return TuyaFlutterHaSdkPlatform.instance.updateLocation(latitude: latitude, longitude: longitude);
+  static Future<void> updateLocation({
+    required double latitude,
+    required double longitude,
+  }) {
+    return TuyaFlutterHaSdkPlatform.instance.updateLocation(
+      latitude: latitude,
+      longitude: longitude,
+    );
   }
 
   /// Retrieve a pairing token for the given homeId.
@@ -393,8 +518,11 @@ class TuyaFlutterHaSdk {
   /// Returns a token of the home
   /// Throws [PlatformException] on failure.
   static Future<String?> getToken({required int homeId}) {
-    if (homeId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "homeId should be specified");
+    if (homeId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeId should be specified",
+      );
     }
     return TuyaFlutterHaSdkPlatform.instance.getToken(homeId: homeId);
   }
@@ -420,17 +548,32 @@ class TuyaFlutterHaSdk {
     required String token,
     int timeout = 100,
   }) {
-    if (mode !="EZ" && mode != "AP") {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "mode should be EZ or AP");
+    if (mode != "EZ" && mode != "AP") {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "mode should be EZ or AP",
+      );
     }
     if (ssid.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "ssid cannot be empty");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "ssid cannot be empty",
+      );
     }
 
     if (token.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "password cannot be empty");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "password cannot be empty",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.startConfigWiFi(mode: mode, ssid: ssid, password: password, token: token, timeout: timeout);
+    return TuyaFlutterHaSdkPlatform.instance.startConfigWiFi(
+      mode: mode,
+      ssid: ssid,
+      password: password,
+      token: token,
+      timeout: timeout,
+    );
   }
 
   /// Stop any ongoing Wi-Fi pairing.
@@ -454,7 +597,9 @@ class TuyaFlutterHaSdk {
   ///
   /// Throws [PlatformException] on failure.
   static Future<void> connectDeviceAndQueryWifiList({int timeout = 120}) {
-    return TuyaFlutterHaSdkPlatform.instance.connectDeviceAndQueryWifiList(timeout: timeout);
+    return TuyaFlutterHaSdkPlatform.instance.connectDeviceAndQueryWifiList(
+      timeout: timeout,
+    );
   }
 
   /// Complete AP+ pairing by resuming with SSID/password/token.
@@ -470,8 +615,18 @@ class TuyaFlutterHaSdk {
   /// - 'token': token of the home
   ///
   /// Throws [PlatformException] on failure.
-  static Future<void> resumeAPPlus({required String ssid, required String password, required String token, int timeout = 120}) {
-    return TuyaFlutterHaSdkPlatform.instance.resumeAPPlus(ssid: ssid, password: password, token: token, timeout: timeout);
+  static Future<void> resumeAPPlus({
+    required String ssid,
+    required String password,
+    required String token,
+    int timeout = 120,
+  }) {
+    return TuyaFlutterHaSdkPlatform.instance.resumeAPPlus(
+      ssid: ssid,
+      password: password,
+      token: token,
+      timeout: timeout,
+    );
   }
 
   /// Scans for the first inactivated BLE device advertising Tuya packets.
@@ -507,17 +662,42 @@ class TuyaFlutterHaSdk {
   /// Returns its raw JSON map, or null if none found.
   ///
   /// Throws [PlatformException] on failure.
-  static Future<Map<String,dynamic>?> pairBleDevice({required String uuid, required String productId, required int homeId,int? deviceType,String? address,int? flag,int? timeout}) {
+  static Future<Map<String, dynamic>?> pairBleDevice({
+    required String uuid,
+    required String productId,
+    required int homeId,
+    int? deviceType,
+    String? address,
+    int? flag,
+    int? timeout,
+  }) {
     if (uuid.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "uuid should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "uuid should be specified",
+      );
     }
     if (productId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "productId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "productId should be specified",
+      );
     }
-    if (homeId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "homeId should be specified");
+    if (homeId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeId should be specified",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.pairBleDevice(uuid: uuid, productId: productId, homeId: homeId,deviceType: deviceType,address:address,flag:flag,timeout:timeout);
+    return TuyaFlutterHaSdkPlatform.instance.pairBleDevice(
+      uuid: uuid,
+      productId: productId,
+      homeId: homeId,
+      deviceType: deviceType,
+      address: address,
+      flag: flag,
+      timeout: timeout,
+    );
   }
 
   /// Start combo (BLE→Wi-Fi) pairing for a device.
@@ -543,28 +723,41 @@ class TuyaFlutterHaSdk {
   /// Returns its raw JSON map, or null if none found.
   ///
   /// Throws [PlatformException] on failure.
-  static Future<Map<String,dynamic>?> startComboPairing({
+  static Future<Map<String, dynamic>?> startComboPairing({
     required String uuid,
     required String productId,
     required int homeId,
     required String ssid,
     required String password,
-    int? deviceType,String? address,
+    int? deviceType,
+    String? address,
     String? token,
     int? timeout,
-    int? flag
+    int? flag,
   }) {
     if (uuid.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "uuid should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "uuid should be specified",
+      );
     }
     if (productId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "productId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "productId should be specified",
+      );
     }
-    if (homeId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "homeId should be specified");
+    if (homeId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeId should be specified",
+      );
     }
     if (ssid.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "ssid should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "ssid should be specified",
+      );
     }
     return TuyaFlutterHaSdkPlatform.instance.startComboPairing(
       uuid: uuid,
@@ -572,10 +765,11 @@ class TuyaFlutterHaSdk {
       homeId: homeId,
       ssid: ssid,
       password: password,
-      deviceType: deviceType,address:address,
-      token:token,
+      deviceType: deviceType,
+      address: address,
+      token: token,
       timeout: timeout,
-      flag:flag
+      flag: flag,
     );
   }
 
@@ -592,7 +786,10 @@ class TuyaFlutterHaSdk {
   /// Throws [PlatformException] on failure.
   static Future<void> initDevice({required String devId}) {
     if (devId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
     return TuyaFlutterHaSdkPlatform.instance.initDevice(devId: devId);
   }
@@ -611,11 +808,20 @@ class TuyaFlutterHaSdk {
   /// Returns its raw JSON map, or null if none found.
   ///
   /// Throws [PlatformException] on failure.
-  static Future<Map<String,dynamic>?> queryDeviceInfo({required String devId,List<String>? dps}) {
+  static Future<Map<String, dynamic>?> queryDeviceInfo({
+    required String devId,
+    List<String>? dps,
+  }) {
     if (devId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.queryDeviceInfo(devId: devId,dps:dps);
+    return TuyaFlutterHaSdkPlatform.instance.queryDeviceInfo(
+      devId: devId,
+      dps: dps,
+    );
   }
 
   /// Rename a specific device
@@ -630,14 +836,26 @@ class TuyaFlutterHaSdk {
   /// - 'name': new name for the device
   ///
   /// Throws [PlatformException] on failure.
-  static Future<void> renameDevice({required String devId,required String name}) {
+  static Future<void> renameDevice({
+    required String devId,
+    required String name,
+  }) {
     if (devId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
     if (name.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "name should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "name should be specified",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.renameDevice(devId: devId,name: name);
+    return TuyaFlutterHaSdkPlatform.instance.renameDevice(
+      devId: devId,
+      name: name,
+    );
   }
 
   /// Remove a specific device
@@ -653,7 +871,10 @@ class TuyaFlutterHaSdk {
   /// Throws [PlatformException] on failure.
   static Future<void> removeDevice({required String devId}) {
     if (devId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
     return TuyaFlutterHaSdkPlatform.instance.removeDevice(devId: devId);
   }
@@ -671,9 +892,14 @@ class TuyaFlutterHaSdk {
   /// Throws [PlatformException] on failure.
   static Future<void> restoreFactoryDefaults({required String devId}) {
     if (devId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.restoreFactoryDefaults(devId: devId);
+    return TuyaFlutterHaSdkPlatform.instance.restoreFactoryDefaults(
+      devId: devId,
+    );
   }
 
   /// Get the signal strength of a specific device
@@ -691,9 +917,14 @@ class TuyaFlutterHaSdk {
   /// Throws [PlatformException] on failure.
   static Future<String?> queryDeviceWiFiStrength({required String devId}) {
     if (devId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.queryDeviceWiFiStrength(devId: devId);
+    return TuyaFlutterHaSdkPlatform.instance.queryDeviceWiFiStrength(
+      devId: devId,
+    );
   }
 
   /// Query details of any sub devices
@@ -709,9 +940,14 @@ class TuyaFlutterHaSdk {
   /// Returns its raw JSON map, or null if none found.
   ///
   /// Throws [PlatformException] on failure.
-  static Future<Map<String,dynamic>?> querySubDeviceList({required String devId}) {
+  static Future<Map<String, dynamic>?> querySubDeviceList({
+    required String devId,
+  }) {
     if (devId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
     return TuyaFlutterHaSdkPlatform.instance.querySubDeviceList(devId: devId);
   }
@@ -729,9 +965,14 @@ class TuyaFlutterHaSdk {
   /// Returns its raw JSON map, or null if none found.
   ///
   /// Throws [PlatformException] on failure.
-  static Future<List<Map<String,dynamic>>?> getRoomList({required int homeId}) {
-    if (homeId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "homeId should be specified");
+  static Future<List<Map<String, dynamic>>?> getRoomList({
+    required int homeId,
+  }) {
+    if (homeId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeId should be specified",
+      );
     }
     return TuyaFlutterHaSdkPlatform.instance.getRoomList(homeId: homeId);
   }
@@ -748,14 +989,23 @@ class TuyaFlutterHaSdk {
   /// - 'roomName': name of the new room
   ///
   /// Throws [PlatformException] on failure.
-  static Future<void> addRoom({required int homeId,required String roomName}) {
-    if (homeId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "homeId should be specified");
+  static Future<void> addRoom({required int homeId, required String roomName}) {
+    if (homeId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeId should be specified",
+      );
     }
     if (roomName.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "roomName should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "roomName should be specified",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.addRoom(homeId: homeId,roomName: roomName);
+    return TuyaFlutterHaSdkPlatform.instance.addRoom(
+      homeId: homeId,
+      roomName: roomName,
+    );
   }
 
   /// Remove room from a home
@@ -770,14 +1020,23 @@ class TuyaFlutterHaSdk {
   /// - 'roomId': roomId for a given room
   ///
   /// Throws [PlatformException] on failure.
-  static Future<void> removeRoom({required int homeId,required int roomId}) {
-    if (homeId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "homeId should be specified");
+  static Future<void> removeRoom({required int homeId, required int roomId}) {
+    if (homeId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeId should be specified",
+      );
     }
-    if (roomId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "roomId should be specified");
+    if (roomId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "roomId should be specified",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.removeRoom(homeId: homeId,roomId: roomId);
+    return TuyaFlutterHaSdkPlatform.instance.removeRoom(
+      homeId: homeId,
+      roomId: roomId,
+    );
   }
 
   /// Sort the order of rooms in a home
@@ -792,14 +1051,26 @@ class TuyaFlutterHaSdk {
   /// - 'roomIds': list of roomIds in the order to sort
   ///
   /// Throws [PlatformException] on failure.
-  static Future<void> sortRooms({required int homeId,required List<int> roomIds}) {
-    if (homeId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "homeId should be specified");
+  static Future<void> sortRooms({
+    required int homeId,
+    required List<int> roomIds,
+  }) {
+    if (homeId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeId should be specified",
+      );
     }
     if (roomIds.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "roomIds should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "roomIds should be specified",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.sortRooms(homeId: homeId,roomIds: roomIds);
+    return TuyaFlutterHaSdkPlatform.instance.sortRooms(
+      homeId: homeId,
+      roomIds: roomIds,
+    );
   }
 
   /// Update the name of a given room
@@ -815,17 +1086,34 @@ class TuyaFlutterHaSdk {
   /// - 'roomName': new name of the room
   ///
   /// Throws [PlatformException] on failure.
-  static Future<void> updateRoomName({required int homeId,required int roomId,required String roomName}) {
-    if (homeId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "homeId should be specified");
+  static Future<void> updateRoomName({
+    required int homeId,
+    required int roomId,
+    required String roomName,
+  }) {
+    if (homeId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeId should be specified",
+      );
     }
-    if (roomId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "roomId should be specified");
+    if (roomId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "roomId should be specified",
+      );
     }
     if (roomName.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "roomName should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "roomName should be specified",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.updateRoomName(homeId: homeId,roomId: roomId,roomName: roomName);
+    return TuyaFlutterHaSdkPlatform.instance.updateRoomName(
+      homeId: homeId,
+      roomId: roomId,
+      roomName: roomName,
+    );
   }
 
   /// Add a given device to a room
@@ -841,17 +1129,34 @@ class TuyaFlutterHaSdk {
   /// - 'devId': devId of the given device
   ///
   /// Throws [PlatformException] on failure.
-  static Future<void> addDeviceToRoom({required int homeId,required int roomId,required String devId}) {
-    if (homeId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "homeId should be specified");
+  static Future<void> addDeviceToRoom({
+    required int homeId,
+    required int roomId,
+    required String devId,
+  }) {
+    if (homeId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeId should be specified",
+      );
     }
-    if (roomId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "roomId should be specified");
+    if (roomId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "roomId should be specified",
+      );
     }
     if (devId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.addDeviceToRoom(homeId: homeId,roomId: roomId,devId: devId);
+    return TuyaFlutterHaSdkPlatform.instance.addDeviceToRoom(
+      homeId: homeId,
+      roomId: roomId,
+      devId: devId,
+    );
   }
 
   /// Remove device from a given room
@@ -867,17 +1172,34 @@ class TuyaFlutterHaSdk {
   /// - 'devId': devId of the given device
   ///
   /// Throws [PlatformException] on failure.
-  static Future<void> removeDeviceFromRoom({required int homeId,required int roomId,required String devId}) {
-    if (homeId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "homeId should be specified");
+  static Future<void> removeDeviceFromRoom({
+    required int homeId,
+    required int roomId,
+    required String devId,
+  }) {
+    if (homeId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeId should be specified",
+      );
     }
-    if (roomId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "roomId should be specified");
+    if (roomId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "roomId should be specified",
+      );
     }
     if (devId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.removeDeviceFromRoom(homeId: homeId,roomId: roomId,devId: devId);
+    return TuyaFlutterHaSdkPlatform.instance.removeDeviceFromRoom(
+      homeId: homeId,
+      roomId: roomId,
+      devId: devId,
+    );
   }
 
   /// Add a group to a given room
@@ -893,17 +1215,34 @@ class TuyaFlutterHaSdk {
   /// - 'groupId': groupId of a given group
   ///
   /// Throws [PlatformException] on failure.
-  static Future<void> addGroupToRoom({required int homeId,required int roomId,required int groupId}) {
-    if (homeId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "homeId should be specified");
+  static Future<void> addGroupToRoom({
+    required int homeId,
+    required int roomId,
+    required int groupId,
+  }) {
+    if (homeId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeId should be specified",
+      );
     }
-    if (roomId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "roomId should be specified");
+    if (roomId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "roomId should be specified",
+      );
     }
-    if (groupId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "groupId should be specified");
+    if (groupId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "groupId should be specified",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.addGroupToRoom(homeId: homeId,roomId: roomId,groupId: groupId);
+    return TuyaFlutterHaSdkPlatform.instance.addGroupToRoom(
+      homeId: homeId,
+      roomId: roomId,
+      groupId: groupId,
+    );
   }
 
   /// Remove a group from a given room
@@ -919,17 +1258,34 @@ class TuyaFlutterHaSdk {
   /// - 'groupId': groupId of a given group
   ///
   /// Throws [PlatformException] on failure.
-  static Future<void> removeGroupFromRoom({required int homeId,required int roomId,required int groupId}) {
-    if (homeId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "homeId should be specified");
+  static Future<void> removeGroupFromRoom({
+    required int homeId,
+    required int roomId,
+    required int groupId,
+  }) {
+    if (homeId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeId should be specified",
+      );
     }
-    if (roomId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "roomId should be specified");
+    if (roomId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "roomId should be specified",
+      );
     }
-    if (groupId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "groupId should be specified");
+    if (groupId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "groupId should be specified",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.removeGroupFromRoom(homeId: homeId,roomId: roomId,groupId: groupId);
+    return TuyaFlutterHaSdkPlatform.instance.removeGroupFromRoom(
+      homeId: homeId,
+      roomId: roomId,
+      groupId: groupId,
+    );
   }
 
   /// Get a list of cameras added to a home
@@ -946,8 +1302,11 @@ class TuyaFlutterHaSdk {
   ///
   /// Throws [PlatformException] on failure.
   static Future<List<Map<String, dynamic>>> listCameras({required int homeId}) {
-    if (homeId==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "homeId should be specified");
+    if (homeId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeId should be specified",
+      );
     }
     return TuyaCameraMethods.listCameras(homeId: homeId);
   }
@@ -965,9 +1324,14 @@ class TuyaFlutterHaSdk {
   /// Returns its raw JSON map, or null if none found.
   ///
   /// Throws [PlatformException] on failure.
-  static Future<Map<String, dynamic>> getCameraCapabilities({required String deviceId}) {
+  static Future<Map<String, dynamic>> getCameraCapabilities({
+    required String deviceId,
+  }) {
     if (deviceId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
     return TuyaCameraMethods.getCameraCapabilities(deviceId: deviceId);
   }
@@ -985,7 +1349,10 @@ class TuyaFlutterHaSdk {
   /// Throws [PlatformException] on failure.
   static Future<void> startLiveStream({required String deviceId}) {
     if (deviceId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
     return TuyaCameraMethods.startLiveStream(deviceId: deviceId);
   }
@@ -1003,7 +1370,10 @@ class TuyaFlutterHaSdk {
   /// Throws [PlatformException] on failure.
   static Future<void> stopLiveStream({required String deviceId}) {
     if (deviceId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
     return TuyaCameraMethods.stopLiveStream(deviceId: deviceId);
   }
@@ -1021,17 +1391,34 @@ class TuyaFlutterHaSdk {
   /// Returns its raw JSON map, or null if none found.
   ///
   /// Throws [PlatformException] on failure.
-  static Future<List<Map<String, dynamic>>> getDeviceAlerts({required String deviceId,required int year,required int month}) {
+  static Future<List<Map<String, dynamic>>> getDeviceAlerts({
+    required String deviceId,
+    required int year,
+    required int month,
+  }) {
     if (deviceId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
-    if (year==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "year should be specified");
+    if (year == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "year should be specified",
+      );
     }
-    if (month==0) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "month should be specified");
+    if (month == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "month should be specified",
+      );
     }
-    return TuyaCameraMethods.getDeviceAlerts(deviceId: deviceId,year: year,month: month);
+    return TuyaCameraMethods.getDeviceAlerts(
+      deviceId: deviceId,
+      year: year,
+      month: month,
+    );
   }
 
   /// Save the current video to a given path
@@ -1047,7 +1434,10 @@ class TuyaFlutterHaSdk {
   /// Throws [PlatformException] on failure.
   static Future<void> saveVideoToGallery({required String filePath}) {
     if (filePath.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "filePath should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "filePath should be specified",
+      );
     }
     return TuyaCameraMethods.saveVideoToGallery(filePath: filePath);
   }
@@ -1083,15 +1473,18 @@ class TuyaFlutterHaSdk {
     required Map<String, dynamic> dps,
   }) {
     if (deviceId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
     if (dps.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "dps should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "dps should be specified",
+      );
     }
-    return TuyaCameraMethods.setDeviceDpConfigs(
-      deviceId: deviceId,
-      dps: dps,
-    );
+    return TuyaCameraMethods.setDeviceDpConfigs(deviceId: deviceId, dps: dps);
   }
 
   /// Get the current configurations of set of DP codes on a device
@@ -1111,9 +1504,13 @@ class TuyaFlutterHaSdk {
     required String deviceId,
   }) {
     if (deviceId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
-    return TuyaCameraMethods.getDeviceDpConfigs(deviceId: deviceId);}
+    return TuyaCameraMethods.getDeviceDpConfigs(deviceId: deviceId);
+  }
 
   /// Kick off APNs / FCM registration on the native side
   ///
@@ -1131,8 +1528,8 @@ class TuyaFlutterHaSdk {
   /// - 'isOpen': boolean indicating register/unregister
   ///
   /// Throws [PlatformException] on failure.
-  static Future<void> registerPush({required int type,required bool isOpen}) {
-    return TuyaCameraMethods.registerPush(type: type,isOpen: isOpen);
+  static Future<void> registerPush({required int type, required bool isOpen}) {
+    return TuyaCameraMethods.registerPush(type: type, isOpen: isOpen);
   }
 
   /// Get all messages
@@ -1145,7 +1542,7 @@ class TuyaFlutterHaSdk {
   /// Returns its raw JSON map, or null if none found.
   ///
   /// Throws [PlatformException] on failure.
-  static Future<List<Map<String,dynamic>>> getAllMessages(){
+  static Future<List<Map<String, dynamic>>> getAllMessages() {
     return TuyaCameraMethods.getAllMessages();
   }
 
@@ -1162,7 +1559,10 @@ class TuyaFlutterHaSdk {
   /// Throws [PlatformException] on failure.
   static Future<void> unlockBLELock({required String devId}) {
     if (devId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
     return TuyaFlutterHaSdkPlatform.instance.unlockBLELock(devId: devId);
   }
@@ -1180,7 +1580,10 @@ class TuyaFlutterHaSdk {
   /// Throws [PlatformException] on failure.
   static Future<void> lockBLELock({required String devId}) {
     if (devId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
     return TuyaFlutterHaSdkPlatform.instance.lockBLELock(devId: devId);
   }
@@ -1197,11 +1600,20 @@ class TuyaFlutterHaSdk {
   /// - 'open': boolean indicating open or not to open
   ///
   /// Throws [PlatformException] on failure.
-  static Future<void> replyRequestUnlock({required String devId,required bool open}) {
+  static Future<void> replyRequestUnlock({
+    required String devId,
+    required bool open,
+  }) {
     if (devId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.unlockWifiLock(devId: devId,open: open);
+    return TuyaFlutterHaSdkPlatform.instance.unlockWifiLock(
+      devId: devId,
+      open: open,
+    );
   }
 
   /// Get a dynamic password for opening a wifi lock
@@ -1219,9 +1631,14 @@ class TuyaFlutterHaSdk {
   /// Throws [PlatformException] on failure.
   static Future<String> dynamicWifiLockPassword({required String devId}) {
     if (devId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.dynamicWifiLockPassword(devId: devId);
+    return TuyaFlutterHaSdkPlatform.instance.dynamicWifiLockPassword(
+      devId: devId,
+    );
   }
 
   /// Check if a device is matter device or not
@@ -1237,11 +1654,14 @@ class TuyaFlutterHaSdk {
   /// Returns a bool indicating whether matter or not.
   ///
   /// Throws [PlatformException] on failure.
-  static Future<bool> checkIsMatter({required String devId}){
-    if(devId.isEmpty){
-      throw PlatformException(code: "INVALID_PARAMETER",message: "devId should be specified");
+  static Future<bool> checkIsMatter({required String devId}) {
+    if (devId.isEmpty) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.checkIfMatter(devId:devId);
+    return TuyaFlutterHaSdkPlatform.instance.checkIfMatter(devId: devId);
   }
 
   /// Send dps configuration to control the wifi device
@@ -1258,13 +1678,25 @@ class TuyaFlutterHaSdk {
   /// Returns true if the configuration is set.
   ///
   /// Throws [PlatformException] on failure.
-  static Future<void> controlMatter({required String devId,required Map<String, dynamic> dps}){
+  static Future<void> controlMatter({
+    required String devId,
+    required Map<String, dynamic> dps,
+  }) {
     if (devId.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "devId should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "devId should be specified",
+      );
     }
     if (dps.isEmpty) {
-      throw PlatformException(code: "INVALID_PARAMETER", message: "dps should be specified");
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "dps should be specified",
+      );
     }
-    return TuyaFlutterHaSdkPlatform.instance.controlMatter(devId:devId,dps:dps);
+    return TuyaFlutterHaSdkPlatform.instance.controlMatter(
+      devId: devId,
+      dps: dps,
+    );
   }
 }
