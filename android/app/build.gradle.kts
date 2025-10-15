@@ -47,6 +47,23 @@ android {
         jniLibs {
             pickFirsts += listOf("lib/**/libc++_shared.so")
         }
+        packagingOptions {
+        pickFirst("lib/*/libc++_shared.so")
+        pickFirst("lib/*/libyuv.so")
+        pickFirst("lib/*/libopenh264.so")
+        pickFirst("lib/*/libthing_security.so")
+        pickFirst("lib/*/libthing_security_algorithm.so")
+
+        excludes += setOf(
+            "META-INF/LICENSE.txt",
+            "META-INF/NOTICE",
+            "META-INF/LICENSE",
+            "META-INF/NOTICE.txt",
+            "META-INF/INDEX.LIST",
+            "**/values/values.xml",
+            "**/values-*/values.xml"
+        )
+    }
     }
     signingConfigs {
         create("release") {
@@ -62,6 +79,7 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            minifyEnabled false
             proguardFiles(
             getDefaultProguardFile("proguard-android-optimize.txt"),
             "proguard-rules.pro"
@@ -72,6 +90,8 @@ android {
 configurations.all {
     exclude(group = "com.thingclips.smart", module = "thingsmart-modularCampAnno")
     exclude(group = "commons-io", module = "commons-io")
+    exclude(group = "com.facebook.fresco", module: "drawee")
+    exclude(group = "com.facebook.fresco", module: "fresco")
 }
 
 flutter {
