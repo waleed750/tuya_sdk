@@ -42,7 +42,13 @@ android {
         }
     }
 
-     packaging {
+    sourceSets {
+        getByName("main") {
+            jniLibs.srcDirs("libs/jni")
+        }
+    }
+
+    packaging {
         jniLibs {
             pickFirsts += listOf(
                 "lib/*/libc++_shared.so",

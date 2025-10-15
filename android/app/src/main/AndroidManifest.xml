@@ -22,7 +22,14 @@
     <meta-data
     android:name="THING_SMART_SECRET"
     android:value="9m38apxreufd38hmnn9c79rf73nj3tcm" />
-    
+    <meta-data
+            android:name="THING_SMART_REGION"
+            android:value="EU" />
+        
+        <!-- App Schema Configuration -->
+        <meta-data
+            android:name="THING_SMART_APP_SCHEMA"
+            android:value="isyncloudssyncn" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
