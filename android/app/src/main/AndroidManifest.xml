@@ -15,6 +15,14 @@
         android:name=".MainApplication"
         android:icon="@mipmap/ic_launcher"
         tools:replace="android:label">
+
+                <meta-data
+    android:name="THING_SMART_APPKEY"
+    android:value="msf947w8qfpcwmhwcnwr" />
+    <meta-data
+    android:name="THING_SMART_SECRET"
+    android:value="9m38apxreufd38hmnn9c79rf73nj3tcm" />
+    
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -42,6 +50,7 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
@@ -54,4 +63,6 @@
             <data android:mimeType="text/plain"/>
         </intent>
     </queries>
+   
+
 </manifest>

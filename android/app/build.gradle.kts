@@ -1,8 +1,16 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -28,15 +36,42 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+         ndk {
+            // add the ABIs you want to package
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a")
+        }
     }
 
+     packaging {
+        // AARs may bring multiple copies of libc++_shared.so; pick the first
+        jniLibs {
+            pickFirsts += listOf("lib/**/libc++_shared.so")
+        }
+    }
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties["keyAlias"] as String
+            keyPassword = keystoreProperties["keyPassword"] as String
+            storeFile = keystoreProperties["storeFile"]?.let { file(it) }
+            storePassword = keystoreProperties["storePassword"] as String
+        }
+    }
     buildTypes {
+        
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            proguardFiles(
+            getDefaultProguardFile("proguard-android-optimize.txt"),
+            "proguard-rules.pro"
+        )
         }
     }
+}
+configurations.all {
+    exclude(group = "com.thingclips.smart", module = "thingsmart-modularCampAnno")
+    exclude(group = "commons-io", module = "commons-io")
 }
 
 flutter {
@@ -64,6 +99,6 @@ dependencies {
 
   // SoLoader (required by Tuya SDK)
   implementation ("com.facebook.soloader:soloader:0.10.4+")
-  
+  implementation(files("libs/security-algorithm-1.0.0-beta.aar"))
   implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar"))))
 }
