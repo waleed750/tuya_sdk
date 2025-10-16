@@ -51,7 +51,7 @@ class _LoginFormState extends State<LoginForm> {
               ),
             ),
             keyboardType: TextInputType.emailAddress,
-            validator: (v) => _validateEmail(v),
+            // validator: (v) => _validateEmail(v),
             textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 16),

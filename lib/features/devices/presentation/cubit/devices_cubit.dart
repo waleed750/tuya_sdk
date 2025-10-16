@@ -1,6 +1,10 @@
+import 'dart:developer';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tuya_flutter_ha_sdk/models/user_model.dart';
+import 'package:tuya_flutter_ha_sdk/models/thing_smart_home_model.dart';
+
 import 'package:tuya_flutter_ha_sdk/tuya_flutter_ha_sdk.dart';
 
 part 'devices_state.dart';
@@ -9,15 +13,26 @@ class DevicesCubit extends Cubit<DevicesState> {
   DevicesCubit() : super(DevicesInitial());
 
   int? currentHomeId;
+  List<ThingSmartHomeModel>? currentHomes;
+  ThingSmartUserModel? currentDevice;
+
   Future<void> loadHomes() async {
     emit(DevicesLoading());
+    currentHomes?.clear();
     final homes = await TuyaFlutterHaSdk.getHomeList();
     if (homes.isEmpty) {
       emit(DevicesError(message: 'No homes found'));
       return;
     } else {
+      currentHomes = homes.map((e) => ThingSmartHomeModel.fromJson(e)).toList();
+      log(homes.toString());
       emit(HomesLoaded());
     }
+  }
+
+  setHomeId(int homeId) {
+    currentHomeId = homeId;
+    emit(HomeSelected());
   }
 
   Future<void> loadDevices() async {
@@ -31,5 +46,10 @@ class DevicesCubit extends Cubit<DevicesState> {
     } else {
       emit(DevicesLoaded());
     }
+  }
+
+  void setCurrentDevice(ThingSmartUserModel device) {
+    currentDevice = device;
+    emit(DevicesLoaded());
   }
 }

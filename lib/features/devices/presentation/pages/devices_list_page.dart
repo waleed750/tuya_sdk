@@ -4,7 +4,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/app_colors.dart';
 import '../cubit/devices_cubit.dart';
-import '../widgets/device_tile.dart';
 
 class DevicesListPage extends StatefulWidget {
   const DevicesListPage({super.key});

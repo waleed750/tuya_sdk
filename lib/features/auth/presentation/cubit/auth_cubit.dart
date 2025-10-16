@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'package:equatable/equatable.dart';
+import 'package:example/core/cache/app_prefs.dart';
 import 'package:example/features/auth/data/user_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tuya_flutter_ha_sdk/models/user_model.dart';
@@ -21,10 +22,43 @@ class AuthCubit extends Cubit<AuthState> {
 
   TuyaUserModel? user;
   ThingSmartUserModel? thingSmartUserModel;
-  bool isRegisterMode = false;
   void toggleMode() {
-    isRegisterMode = !isRegisterMode;
-    emit(AuthIdle(isRegisterMode: isRegisterMode));
+    if (state is AuthIdle) {
+      final currentState = state as AuthIdle;
+      emit(AuthIdle(isRegisterMode: !currentState.isRegisterMode));
+    }
+  }
+
+  Future<void> automateLogin() async {
+    final userData = await secureStorage.getUserData();
+    if (userData != null) {
+      user = TuyaUserModel.fromMap(userData);
+      final resultInfo = await TuyaFlutterHaSdkPlatform.instance
+          .getCurrentUser();
+      if (resultInfo.isNotEmpty) {
+        thingSmartUserModel = ThingSmartUserModel.fromJson(resultInfo);
+        emit(AuthAuthenticated());
+      } else {
+        emit(const AuthIdle(isRegisterMode: false));
+      }
+    } else {
+      emit(const AuthIdle(isRegisterMode: false));
+    }
+  }
+
+  Future<void> saveUserData() async {
+    if (user != null) {
+      await secureStorage.saveUserData(user!.toJson());
+    }
+  }
+
+  void getUserData() async {
+    final userData = await secureStorage.getUserData();
+    if (userData != null) {
+      thingSmartUserModel = ThingSmartUserModel.fromJson(
+        userData as Map<String, dynamic>,
+      );
+    }
   }
 
   Future<void> login(String email, String password) async {
@@ -41,8 +75,11 @@ class AuthCubit extends Cubit<AuthState> {
           .getCurrentUser();
       if (resultInfo.isNotEmpty) {
         thingSmartUserModel = ThingSmartUserModel.fromJson(resultInfo);
+        await saveUserData();
+        emit(AuthAuthenticated());
+      } else {
+        emit(AuthError(message: "Failed to fetch user info"));
       }
-      emit(AuthAuthenticated());
     } else {
       emit(AuthError(message: result['message'] ?? "Unknown error"));
     }
@@ -70,7 +107,7 @@ class AuthCubit extends Cubit<AuthState> {
     // );
 
     // Start resend cooldown
-    // _startResendCooldown();
+    _startResendCooldown();
 
     // Emit state indicating we need verification and provide lastChecked
     emit(
@@ -130,8 +167,8 @@ class AuthCubit extends Cubit<AuthState> {
         // Verified
         thingSmartUserModel = ThingSmartUserModel.fromJson(resultInfo);
         user = TuyaUserModel.fromMap({'uid': thingSmartUserModel?.uid ?? ''});
-        // _verificationTimer?.cancel();
-        // _resendTimer?.cancel();
+        _verificationTimer?.cancel();
+        _resendTimer?.cancel();
         emit(AuthAuthenticated());
       } else {
         // update lastChecked
@@ -159,24 +196,18 @@ class AuthCubit extends Cubit<AuthState> {
     required String code,
   }) async {
     emit(const AuthLoading(message: 'Registering...'));
-    try {
-      {
-        final result = await TuyaFlutterHaSdkPlatform.instance
-            .registerAccountWithEmail(
-              countryCode: '+1',
-              email: email,
-              password: password,
-              code: code,
-            );
-        if (result.containsKey('uid')) {
-          user = TuyaUserModel.fromMap(result);
-          emit(AuthAuthenticated());
-        } else {
-          emit(AuthError(message: result['message'] ?? "Unknown error"));
-        }
-      }
-    } catch (e) {
-      emit(AuthError(message: e.toString()));
+    final result = await TuyaFlutterHaSdkPlatform.instance
+        .registerAccountWithEmail(
+          countryCode: '+1',
+          email: email,
+          password: password,
+          code: code,
+        );
+    if (result.containsKey('uid')) {
+      user = TuyaUserModel.fromMap(result);
+      emit(AuthAuthenticated());
+    } else {
+      emit(AuthError(message: result['message'] ?? "Unknown error"));
     }
   }
 

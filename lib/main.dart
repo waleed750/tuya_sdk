@@ -1,3 +1,4 @@
+import 'package:example/core/cache/app_prefs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tuya_flutter_ha_sdk/tuya_flutter_ha_sdk.dart';
@@ -26,7 +27,7 @@ Future<void> main() async {
     debugPrint('⛔ Tuya SDK initialization failed: $e');
     debugPrint(stack.toString());
   }
-
+  AppPreferences().init();
   // Initialize dependency injection
 
   runApp(const MyApp());
@@ -39,13 +40,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => AuthCubit()),
+        BlocProvider(create: (context) => AuthCubit()..automateLogin()),
         BlocProvider(create: (context) => DevicesCubit()),
       ],
       child: Builder(
         builder: (context) {
-          final appRouter = AppRouter(authCubit: context.read<AuthCubit>());
-
           return MaterialApp.router(
             title: 'Tuya Smart Home',
             theme: AppTheme.lightTheme,

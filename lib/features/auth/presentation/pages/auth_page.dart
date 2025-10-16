@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/app_colors.dart';
 import '../cubit/auth_cubit.dart';
@@ -24,19 +25,10 @@ class AuthPage extends StatelessWidget {
               ),
             );
           } else if (state is AuthNeedsVerification) {
-            // _showVerificationSheet(context, state);
-          } else if (state is AuthAuthenticated) {
-            // Navigate to the main app page or home screen
-            final user = context.read<AuthCubit>().user;
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => Scaffold(
-                  body: Center(
-                    child: Text('User Data : \n ${user.toString()}'),
-                  ),
-                ),
-              ),
-            );
+            _showVerificationSheet(context, state);
+          }
+          if (state is AuthAuthenticated) {
+            context.goNamed('home');
           }
         },
         builder: (context, state) {
@@ -50,7 +42,8 @@ class AuthPage extends StatelessWidget {
                     const SizedBox(height: 40),
                     _buildHeader(context, state),
                     const SizedBox(height: 40),
-                    if (state is! AuthLoading) _buildCupertinoSegment(context),
+                    if (state is AuthIdle)
+                      _buildCupertinoSegment(context, state),
                     const SizedBox(height: 32),
                     _buildContent(context, state),
                   ],
@@ -89,13 +82,12 @@ class AuthPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCupertinoSegment(BuildContext context) {
+  Widget _buildCupertinoSegment(BuildContext context, AuthIdle state) {
     final theme = Theme.of(context);
-    final state = context.watch<AuthCubit>().isRegisterMode;
     return ClipRRect(
       borderRadius: BorderRadius.circular(150.0),
       child: CupertinoSegmentedControl<bool>(
-        groupValue: state,
+        groupValue: state.isRegisterMode,
         selectedColor: AppColors.primary,
         unselectedColor: CupertinoColors.systemGrey,
         borderColor: CupertinoColors.systemGrey,
@@ -145,25 +137,26 @@ class AuthPage extends StatelessWidget {
           ),
         ],
       );
-    } else {
-      return context.read<AuthCubit>().isRegisterMode
-          ? const RegisterForm()
-          : const LoginForm();
+    } else if (state is AuthIdle) {
+      return state.isRegisterMode ? const RegisterForm() : const LoginForm();
     }
+
+    // Default empty container for other states
+    return Container();
   }
 
-  // void _showVerificationSheet(
-  //   BuildContext context,
-  //   AuthNeedsVerification state,
-  // ) {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     isDismissible: false,
-  //     enableDrag: false,
-  //     isScrollControlled: true,
-  //     backgroundColor: Colors.transparent,
-  //     builder: (context) =>
-  //         VerifyWaitSheet(email: state.email, lastChecked: state.lastChecked),
-  //   );
-  // }
+  void _showVerificationSheet(
+    BuildContext context,
+    AuthNeedsVerification state,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) =>
+          VerifyWaitSheet(email: state.email, lastChecked: state.lastChecked),
+    );
+  }
 }

@@ -7,17 +7,17 @@ abstract class DevicesState extends Equatable {
   List<Object?> get props => [];
 }
 
-class DevicesInitial extends DevicesState {}
+final class DevicesInitial extends DevicesState {}
 
-class DevicesLoading extends DevicesState {}
+final class DevicesLoading extends DevicesState {}
 
-class DevicesRefreshing extends DevicesState {
+final class DevicesRefreshing extends DevicesState {
   const DevicesRefreshing();
 }
 
-class DevicesLoaded extends DevicesState {}
+final class DevicesLoaded extends DevicesState {}
 
-class DevicesError extends DevicesState {
+final class DevicesError extends DevicesState {
   final String message;
 
   const DevicesError({required this.message});
@@ -26,6 +26,8 @@ class DevicesError extends DevicesState {
   List<Object> get props => [message];
 }
 
-class HomesLoaded extends DevicesState {}
+final class HomesLoaded extends DevicesState {}
 
-class HomesLoading extends DevicesState {}
+final class HomesLoading extends DevicesState {}
+
+final class HomeSelected extends DevicesState {}

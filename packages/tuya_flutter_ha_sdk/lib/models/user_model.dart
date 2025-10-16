@@ -2,25 +2,25 @@ import 'dart:convert';
 
 class ThingSmartUserModel {
   /// The user's uid.
-  final String uid;
+  final String? uid;
+
   /// The user's username.
-  final String username;
+  final String? username;
 
   /// The user's country code.
-  final String countryCode;
+  final String? countryCode;
 
   /// The user's email.
-  final String email;
+  final String? email;
 
   /// The user's region code.
-  final String regionCode;
+  final String? regionCode;
 
   /// The user's phone number.
-  final String phoneNumber;
-
+  final String? phoneNumber;
 
   /// The user's nickname.
-  final String nickname;
+  final String? nickname;
 
   /// The user's head icon URL.
   ///
@@ -28,40 +28,54 @@ class ThingSmartUserModel {
   final String? headIconUrl;
 
   /// The users Temp Unit.
-  final String tempUnit;
+  final String? tempUnit;
 
   /// The users Time Zone ID.
-  final String timezoneId;
+  final String? timezoneId;
 
   /// The users Region From.
-  final String regFrom;
-
+  final String? regFrom;
 
   ThingSmartUserModel.fromJson(Map<String, dynamic> json)
-      : uid = json['uid'],username = json['userName'],
-        countryCode = json['countryCode'],
-        email = json['email'],
-        regionCode = json['regionCode'],
-        phoneNumber = json['phoneNumber'],
-        nickname = json['snsNickname'],
-        headIconUrl = json['headIconUrl'].toString().isEmpty
-            ? null
-            : json['headIconUrl'].toString().startsWith('http')
-                ? json['headIconUrl']
-                : 'https://images.tuyaeu.com/${json['headIconUrl']}',
-        tempUnit =json['tempUnit'],
-        timezoneId = json['timezoneId'],
-        regFrom = json['regFrom'];
-  Map<String, dynamic> asMap() => {
-    'username':username,
-    'country_code':countryCode,
-    'email': email ,
-    'region_code': regionCode ,
-    'phoneNumber': phoneNumber ,
-    'nickname':nickname,
-    'headIconUrl':headIconUrl,
-    'tempUnit':tempUnit,
-    'timezoneId':timezoneId,
-    'regFrom':regFrom
+    : uid = json['uid'],
+      username = json['userName'],
+      countryCode = json['countryCode'],
+      email = json['email'],
+      regionCode = json['regionCode'],
+      phoneNumber = json['phoneNumber'],
+      nickname = json['snsNickname'],
+      headIconUrl =
+          json['headIconUrl'].toString().isEmpty
+              ? null
+              : json['headIconUrl'].toString().startsWith('http')
+              ? json['headIconUrl']
+              : 'https://images.tuyaeu.com/${json['headIconUrl']}',
+      tempUnit = json['tempUnit'],
+      timezoneId = json['timezoneId'],
+      regFrom = json['regFrom'];
+
+  /// Create a [ThingSmartUserModel] from a Map. Alias for [fromJson].
+  factory ThingSmartUserModel.fromMap(Map<String, dynamic> map) =>
+      ThingSmartUserModel.fromJson(map);
+
+  /// Convert this model to a Map using the same keys expected by [fromJson].
+  Map<String, dynamic> toMap() => {
+    'uid': uid,
+    'userName': username,
+    'countryCode': countryCode,
+    'email': email,
+    'regionCode': regionCode,
+    'phoneNumber': phoneNumber,
+    'snsNickname': nickname,
+    'headIconUrl': headIconUrl,
+    'tempUnit': tempUnit,
+    'timezoneId': timezoneId,
+    'regFrom': regFrom,
   };
+
+  /// JSON string representation of this model.
+  String toJson() => json.encode(toMap());
+
+  /// Backwards-compatible alias for `toMap()` used elsewhere in the project.
+  Map<String, dynamic> asMap() => toMap();
 }
