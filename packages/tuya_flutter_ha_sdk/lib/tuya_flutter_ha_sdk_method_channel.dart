@@ -100,14 +100,12 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
     return Map<String, dynamic>.from(result);
   }
 
-  /// Logout the current user.
   /// userLogout function on the native side is invoked
   @override
   Future<void> userLogout() async {
     await methodChannel.invokeMethod<void>('userLogout');
   }
-  
-  /// Register a new account with email.
+
   /// [countryCode], [email], [password], [code] details are passed to the native implementation
   /// registerAccountWithEmail function on the native side is invoked
   @override
@@ -128,7 +126,7 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
     );
     return result?.cast<String, dynamic>() ?? {};
   }
-  
+
   /// Register a new account with phone.
   /// [countryCode], [phone], [password], [code] details are passed to the native implementation
   /// registerAccountWithPhone function on the native side is invoked
@@ -149,6 +147,25 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
       },
     );
     return result?.cast<String, dynamic>() ?? {};
+  }
+
+  /// Sends a verification code to an email address or phone number.
+  /// [accountType] can be "email" or "phone". When [type] is omitted the
+  /// native SDK defaults to the registration verification flow.
+  @override
+  Future<void> sendVerificationCode({
+    required String countryCode,
+    required String account,
+    required String accountType,
+    int? type,
+  }) async {
+    await methodChannel
+        .invokeMethod<void>('sendVerificationCode', <String, dynamic>{
+          'countryCode': countryCode,
+          'account': account,
+          'accountType': accountType,
+          if (type != null) 'type': type,
+        });
   }
 
   /// Deletes the current user account.

@@ -10,10 +10,10 @@ class VerifyWaitSheet extends StatelessWidget {
   final DateTime lastChecked;
 
   const VerifyWaitSheet({
-    Key? key,
+    super.key,
     required this.email,
     required this.lastChecked,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +49,7 @@ class VerifyWaitSheet extends StatelessWidget {
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () {
-              // context.read<AuthCubit>().manualCheckVerification();
+              context.read<AuthCubit>().checkNow(email);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
@@ -65,12 +65,35 @@ class VerifyWaitSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          TextButton(
-            onPressed: () {
-              context.read<AuthCubit>().cancelVerification();
-              Navigator.of(context).pop();
-            },
-            child: const Text('Cancel'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextButton(
+                onPressed: () {
+                  context.read<AuthCubit>().cancelVerification();
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Cancel'),
+              ),
+              BlocBuilder<AuthCubit, AuthState>(
+                builder: (context, state) {
+                  int secondsLeft = 0;
+                  if (state is AuthNeedsVerification) {
+                    secondsLeft = state.resendSecondsLeft;
+                  }
+                  return TextButton(
+                    onPressed: secondsLeft > 0
+                        ? null
+                        : () => context.read<AuthCubit>().resendVerification(
+                            email,
+                          ),
+                    child: secondsLeft > 0
+                        ? Text('Resend in ${secondsLeft}s')
+                        : const Text('Resend'),
+                  );
+                },
+              ),
+            ],
           ),
         ],
       ),

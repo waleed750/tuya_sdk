@@ -236,7 +236,59 @@ public class TuyaFlutterHaSdkPlugin: NSObject, FlutterPlugin {
                 let msg = error?.localizedDescription ?? "Unknown error"
                 result(FlutterError(code: "DELETE_FAILED", message: msg, details: nil))
             })
-            
+        case "sendVerificationCode":
+            guard
+                let args = call.arguments as? [String: Any],
+                let countryCode = args["countryCode"] as? String,
+                let account = args["account"] as? String,
+                let accountType = args["accountType"] as? String
+            else {
+                result(FlutterError(code: "MISSING_ARGS",
+                                    message: "countryCode, account, accountType required",
+                                    details: nil))
+                return
+            }
+
+            let trimmedType = accountType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            guard trimmedType == "email" || trimmedType == "phone" else {
+                result(FlutterError(code: "INVALID_PARAMETER",
+                                    message: "accountType must be either 'email' or 'phone'",
+                                    details: nil))
+                return
+            }
+
+            let defaultType = ThingSmartValidateCodeType.register
+            let typeRaw = args["type"] as? Int
+            let rawValue = typeRaw != nil ? UInt(typeRaw!) : defaultType.rawValue
+            guard let verificationType = ThingSmartValidateCodeType(rawValue: rawValue) else {
+                result(FlutterError(code: "INVALID_PARAMETER",
+                                    message: "Unsupported verification type value",
+                                    details: nil))
+                return
+            }
+
+            let successCallback = {
+                result(nil)
+            }
+
+            let failureCallback: (Error?) -> Void = { error in
+                let msg = error?.localizedDescription ?? "Unknown error"
+                result(FlutterError(code: "SEND_VERIFICATION_FAILED", message: msg, details: nil))
+            }
+
+            if trimmedType == "email" {
+                ThingSmartUser.sharedInstance().sendVerifyCode(byEmail: account,
+                                                               countryCode: countryCode,
+                                                               type: verificationType,
+                                                               success: successCallback,
+                                                               failure: failureCallback)
+            } else {
+                ThingSmartUser.sharedInstance().sendVerifyCode(byPhone: account,
+                                                               countryCode: countryCode,
+                                                               type: verificationType,
+                                                               success: successCallback,
+                                                               failure: failureCallback)
+            }
             // ── User Preferences ────────────────────────────────────────────────────────
         case "updateTimeZone":
             // updateTimeZone function of the Tuya SDK is called

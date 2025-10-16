@@ -1,9 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/app_colors.dart';
 import '../cubit/auth_cubit.dart';
-import '../widgets/auth_form.dart';
+import '../widgets/login_form.dart';
+import '../widgets/register_form.dart';
 import '../widgets/verify_wait_sheet.dart';
 
 class AuthPage extends StatelessWidget {
@@ -22,7 +24,19 @@ class AuthPage extends StatelessWidget {
               ),
             );
           } else if (state is AuthNeedsVerification) {
-            _showVerificationSheet(context, state);
+            // _showVerificationSheet(context, state);
+          } else if (state is AuthAuthenticated) {
+            // Navigate to the main app page or home screen
+            final user = context.read<AuthCubit>().user;
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => Scaffold(
+                  body: Center(
+                    child: Text('User Data : \n ${user.toString()}'),
+                  ),
+                ),
+              ),
+            );
           }
         },
         builder: (context, state) {
@@ -36,8 +50,7 @@ class AuthPage extends StatelessWidget {
                     const SizedBox(height: 40),
                     _buildHeader(context, state),
                     const SizedBox(height: 40),
-                    if (state is AuthIdle)
-                      _buildSegmentedControl(context, state),
+                    if (state is! AuthLoading) _buildCupertinoSegment(context),
                     const SizedBox(height: 32),
                     _buildContent(context, state),
                   ],
@@ -76,65 +89,43 @@ class AuthPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSegmentedControl(BuildContext context, AuthIdle state) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.neutral100,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildSegmentButton(
-              context,
-              title: 'Login',
-              isSelected: !state.isRegisterMode,
-              onTap: () {
-                if (state.isRegisterMode) {
-                  context.read<AuthCubit>().toggleMode();
-                }
-              },
+  Widget _buildCupertinoSegment(BuildContext context) {
+    final theme = Theme.of(context);
+    final state = context.watch<AuthCubit>().isRegisterMode;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(150.0),
+      child: CupertinoSegmentedControl<bool>(
+        groupValue: state,
+        selectedColor: AppColors.primary,
+        unselectedColor: CupertinoColors.systemGrey,
+        borderColor: CupertinoColors.systemGrey,
+        children: {
+          false: Padding(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: Text(
+              'Login',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium,
             ),
           ),
-          Expanded(
-            child: _buildSegmentButton(
-              context,
-              title: 'Register',
-              isSelected: state.isRegisterMode,
-              onTap: () {
-                if (!state.isRegisterMode) {
-                  context.read<AuthCubit>().toggleMode();
-                }
-              },
+          true: Padding(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: Text(
+              'Register',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSegmentButton(
-    BuildContext context, {
-    required String title,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          title,
-          style: TextStyle(
-            color: isSelected ? Colors.white : AppColors.neutral700,
-            fontWeight: FontWeight.bold,
-          ),
-          textAlign: TextAlign.center,
-        ),
+        },
+        onValueChanged: (isRegister) {
+          final cubit = context.read<AuthCubit>();
+          final current = cubit.state;
+          if (current is AuthIdle && current.isRegisterMode != isRegister) {
+            cubit.toggleMode();
+          }
+        },
       ),
     );
   }
@@ -154,26 +145,25 @@ class AuthPage extends StatelessWidget {
           ),
         ],
       );
-    } else if (state is AuthIdle) {
-      return AuthForm(isRegisterMode: state.isRegisterMode);
+    } else {
+      return context.read<AuthCubit>().isRegisterMode
+          ? const RegisterForm()
+          : const LoginForm();
     }
-
-    // Default empty container for other states
-    return Container();
   }
 
-  void _showVerificationSheet(
-    BuildContext context,
-    AuthNeedsVerification state,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      isDismissible: false,
-      enableDrag: false,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) =>
-          VerifyWaitSheet(email: state.email, lastChecked: state.lastChecked),
-    );
-  }
+  // void _showVerificationSheet(
+  //   BuildContext context,
+  //   AuthNeedsVerification state,
+  // ) {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     isDismissible: false,
+  //     enableDrag: false,
+  //     isScrollControlled: true,
+  //     backgroundColor: Colors.transparent,
+  //     builder: (context) =>
+  //         VerifyWaitSheet(email: state.email, lastChecked: state.lastChecked),
+  //   );
+  // }
 }

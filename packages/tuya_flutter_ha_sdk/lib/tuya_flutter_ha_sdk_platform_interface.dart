@@ -29,7 +29,11 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
 
   /// Perform native-side initialization of the Tuya SDK.
   /// [appKey] and [appSecret] must match the current platform.
-  Future<void> tuyaSdkInit({required String appKey, required String appSecret, required bool isDebug});
+  Future<void> tuyaSdkInit({
+    required String appKey,
+    required String appSecret,
+    required bool isDebug,
+  });
 
   // ──────────────────────────────────────────────────────────────────────────────
   // User Management
@@ -37,11 +41,21 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
 
   /// Login (or register) with UID.
   /// [countryCode],[uid],[password],[createHome] details are passed on to the native
-  Future<Map<String, dynamic>> loginWithUid({required String countryCode, required String uid, required String password, required bool createHome});
-  
+  Future<Map<String, dynamic>> loginWithUid({
+    required String countryCode,
+    required String uid,
+    required String password,
+    required bool createHome,
+  });
+
   /// Login with email.
   /// [countryCode],[email],[password],[createHome] details are passed on to the native
-  Future<Map<String, dynamic>> loginWithEmail({required String countryCode, required String email, required String password, required bool createHome});
+  Future<Map<String, dynamic>> loginWithEmail({
+    required String countryCode,
+    required String email,
+    required String password,
+    required bool createHome,
+  });
 
   /// Checks if any user is logged in currently.
   /// returns true if logged in and false if not logged in
@@ -53,7 +67,7 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
 
   /// Logs out the current user.
   Future<void> userLogout();
-  
+
   /// Register a new account with email.
   /// [countryCode], [email], [password], [code] details are passed to the native implementation
   Future<Map<String, dynamic>> registerAccountWithEmail({
@@ -62,7 +76,7 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
     required String password,
     required String code,
   });
-  
+
   /// Register a new account with phone.
   /// [countryCode], [phone], [password], [code] details are passed to the native implementation
   Future<Map<String, dynamic>> registerAccountWithPhone({
@@ -70,6 +84,21 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
     required String phone,
     required String password,
     required String code,
+  });
+
+  /// Sends a verification code to [account].
+  ///
+  /// [accountType] determines how the request is sent on the native side. Pass
+  /// "email" to send an email verification code or "phone" to send a SMS code.
+  /// The [countryCode] should match the account’s country prefix. Optionally a
+  /// [type] can be provided to specify the Tuya/Thing validation use-case (for
+  /// example `1` for registration). When omitted the default registration type
+  /// is used by the native SDKs.
+  Future<void> sendVerificationCode({
+    required String countryCode,
+    required String account,
+    required String accountType,
+    int? type,
   });
 
   /// Deletes the current user account.
@@ -94,14 +123,26 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
   /// Creates a new home.
   /// [name],[geoName],[rooms],[latitude],[longitude] details are passed on to the native
   /// Returns the new home ID.
-  Future<int> createHome({required String name, String? geoName, List<String>? rooms, double? latitude, double? longitude});
+  Future<int> createHome({
+    required String name,
+    String? geoName,
+    List<String>? rooms,
+    double? latitude,
+    double? longitude,
+  });
 
   /// Retrieves a list of all homes.
   Future<List<Map<String, dynamic>>> getHomeList();
 
   /// Updates home information.
   /// [homeId],[homeName],[geoName],[latitude],[longitude] details are passed on to the native
-  Future<void> updateHomeInfo({required int homeId, required String homeName, String? geoName, double? latitude, double? longitude});
+  Future<void> updateHomeInfo({
+    required int homeId,
+    required String homeName,
+    String? geoName,
+    double? latitude,
+    double? longitude,
+  });
 
   /// Deletes a home by ID.
   Future<void> deleteHome({required int homeId});
@@ -117,13 +158,22 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
   Future<String?> getSSID();
 
   /// Updates the user’s location (latitude, longitude).
-  Future<void> updateLocation({required double latitude, required double longitude});
+  Future<void> updateLocation({
+    required double latitude,
+    required double longitude,
+  });
 
   /// Retrieves a pairing token for the given homeId.
   Future<String?> getToken({required int homeId});
 
   /// Starts EZ or AP Wi-Fi pairing.
-  Future<void> startConfigWiFi({required String mode, required String ssid, required String password, required String token, required int timeout});
+  Future<void> startConfigWiFi({
+    required String mode,
+    required String ssid,
+    required String password,
+    required String token,
+    required int timeout,
+  });
 
   /// Stops any ongoing Wi-Fi pairing.
   Future<void> stopConfigWiFi();
@@ -132,7 +182,12 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
   Future<void> connectDeviceAndQueryWifiList({required int timeout});
 
   /// Completes AP+ pairing with SSID/password/token.
-  Future<void> resumeAPPlus({required String ssid, required String password, required String token, required int timeout});
+  Future<void> resumeAPPlus({
+    required String ssid,
+    required String password,
+    required String token,
+    required int timeout,
+  });
 
   // ──────────────────────────────────────────────────────────────────────────────
   // BLE Device Discovery & Pairing
@@ -150,7 +205,7 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
     int? deviceType,
     String? address,
     int? flag,
-    int? timeout
+    int? timeout,
   });
 
   /// Start combo (BLE→Wi-Fi) pairing for a device.
@@ -164,14 +219,17 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
     int? deviceType,
     String? address,
     String? token,
-    int? flag
+    int? flag,
   });
 
   /// Init the device
   Future<void> initDevice({required String devId});
 
   /// Query information about a device
-  Future<Map<String, dynamic>?> queryDeviceInfo({required String devId, List<String>? dps});
+  Future<Map<String, dynamic>?> queryDeviceInfo({
+    required String devId,
+    List<String>? dps,
+  });
 
   /// Rename a specific device
   Future<void> renameDevice({required String devId, required String name});
@@ -201,19 +259,39 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
   Future<void> sortRooms({required int homeId, required List<int> roomIds});
 
   /// Update the name of a given room
-  Future<void> updateRoomName({required int homeId, required int roomId, required String roomName});
+  Future<void> updateRoomName({
+    required int homeId,
+    required int roomId,
+    required String roomName,
+  });
 
   /// Add a given device to a room
-  Future<void> addDeviceToRoom({required int homeId, required int roomId, required String devId});
+  Future<void> addDeviceToRoom({
+    required int homeId,
+    required int roomId,
+    required String devId,
+  });
 
   /// Remove device from a given room
-  Future<void> removeDeviceFromRoom({required int homeId, required int roomId, required String devId});
+  Future<void> removeDeviceFromRoom({
+    required int homeId,
+    required int roomId,
+    required String devId,
+  });
 
   /// Add a group to a given room
-  Future<void> addGroupToRoom({required int homeId, required int roomId, required int groupId});
+  Future<void> addGroupToRoom({
+    required int homeId,
+    required int roomId,
+    required int groupId,
+  });
 
   /// Remove a group from a given room
-  Future<void> removeGroupFromRoom({required int homeId, required int roomId, required int groupId});
+  Future<void> removeGroupFromRoom({
+    required int homeId,
+    required int roomId,
+    required int groupId,
+  });
 
   /// Unlock a bluetooth lock device
   Future<void> unlockBLELock({required String devId});
@@ -222,7 +300,7 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
   Future<void> lockBLELock({required String devId});
 
   /// Reply to a unlock request on wifi lock
-  Future<void> unlockWifiLock({required String devId,required bool open});
+  Future<void> unlockWifiLock({required String devId, required bool open});
 
   /// Get a dynamic password for opening a wifi lock
   Future<String> dynamicWifiLockPassword({required String devId});
@@ -231,5 +309,8 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
   Future<bool> checkIfMatter({required String devId});
 
   /// Send dps configuration to control the wifi device
-  Future<void> controlMatter({required String devId,required Map<String,dynamic> dps});
+  Future<void> controlMatter({
+    required String devId,
+    required Map<String, dynamic> dps,
+  });
 }

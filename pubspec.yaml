@@ -39,6 +39,7 @@ dependencies:
   
   # UI components
   lucide_icons_flutter: ^3.1.4
+  loader_overlay: ^5.0.0
 
 
 dev_dependencies:

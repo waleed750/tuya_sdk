@@ -224,7 +224,50 @@ class TuyaFlutterHaSdk {
   static Future<void> userLogout() {
     return TuyaFlutterHaSdkPlatform.instance.userLogout();
   }
-  
+
+  /// Sends a verification code to an email address or phone number.
+  ///
+  /// The [account] parameter can be either an email or phone number depending
+  /// on [accountType]. Supported account types are "email" and "phone". The
+  /// [countryCode] should be provided in numeric form (e.g. `"1"` for US
+  /// numbers). Optionally, you may supply [type] to indicate the verification
+  /// use-case expected by the native Tuya/Thing SDK (defaults to the
+  /// registration flow when omitted).
+  static Future<void> sendVerificationCode({
+    required String countryCode,
+    required String account,
+    required String accountType,
+    int? type,
+  }) {
+    if (countryCode.isEmpty) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "countryCode cannot be empty",
+      );
+    }
+    if (account.isEmpty) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "account cannot be empty",
+      );
+    }
+
+    final normalizedType = accountType.trim().toLowerCase();
+    if (normalizedType != 'email' && normalizedType != 'phone') {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "accountType must be either 'email' or 'phone'",
+      );
+    }
+
+    return TuyaFlutterHaSdkPlatform.instance.sendVerificationCode(
+      countryCode: countryCode,
+      account: account,
+      accountType: normalizedType,
+      type: type,
+    );
+  }
+
   /// Register a new account with email.
   ///
   /// The [email] parameter is the email address of the user.
@@ -237,8 +280,8 @@ class TuyaFlutterHaSdk {
   /// Example Usage:
   /// ```dart
   /// Map<String,dynamic> result = await registerAccountWithEmail(
-  ///   email: 'user@example.com', 
-  ///   countryCode: '1', 
+  ///   email: 'user@example.com',
+  ///   countryCode: '1',
   ///   password: 'password123',
   ///   code: '123456'
   /// );
@@ -283,7 +326,7 @@ class TuyaFlutterHaSdk {
       code: code,
     );
   }
-  
+
   /// Register a new account with phone number.
   ///
   /// The [phone] parameter is the phone number of the user.
@@ -296,8 +339,8 @@ class TuyaFlutterHaSdk {
   /// Example Usage:
   /// ```dart
   /// Map<String,dynamic> result = await registerAccountWithPhone(
-  ///   phone: '1234567890', 
-  ///   countryCode: '1', 
+  ///   phone: '1234567890',
+  ///   countryCode: '1',
   ///   password: 'password123',
   ///   code: '123456'
   /// );

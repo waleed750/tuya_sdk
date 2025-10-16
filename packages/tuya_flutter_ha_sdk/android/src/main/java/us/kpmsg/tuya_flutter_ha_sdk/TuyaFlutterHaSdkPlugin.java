@@ -334,7 +334,43 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                     }
                 );
                 break;
-                
+            case "sendVerificationCode":
+                String verificationCountryCode = call.argument("countryCode");
+                String verificationAccount = call.argument("account");
+                String verificationAccountType = call.argument("accountType");
+                Integer verificationTypeArg = call.argument("type");
+
+                if (verificationCountryCode == null || verificationAccount == null || verificationAccountType == null) {
+                    result.error("MISSING_ARGS", "countryCode, account, accountType required", null);
+                    return;
+                }
+
+                String normalizedAccountType = verificationAccountType.trim().toLowerCase();
+                if (!normalizedAccountType.equals("email") && !normalizedAccountType.equals("phone")) {
+                    result.error("INVALID_PARAMETER", "accountType must be either 'email' or 'phone'", null);
+                    return;
+                }
+
+                int verificationType = verificationTypeArg != null ? verificationTypeArg : 1; // default: register
+
+                ThingHomeSdk.getUserInstance().sendVerifyCodeWithUserName(
+                    verificationAccount,
+                    verificationCountryCode,
+                    verificationAccountType, // accountType ("email" or "phone")
+                    verificationType,
+                    new IResultCallback() {
+                        @Override
+                        public void onSuccess() {
+                            result.success(null);
+                        }
+
+                        @Override
+                        public void onError(String errorCode, String errorMessage) {
+                            result.error("SEND_VERIFICATION_FAILED", errorMessage + " (code: " + errorCode + ")", null);
+                        }
+                    }
+                );
+                break;
             case "registerAccountWithPhone":
                 // Register by phone using Tuya SDK
                 String regPhoneCountryCode = call.argument("countryCode");
@@ -1256,6 +1292,7 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                     }
                 });
                 break;
+        
             case "checkIfMatter":
                 //isMatter function of Tuya SDK is called
                 String checkMatterDevId = call.argument("devId");
