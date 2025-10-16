@@ -100,11 +100,55 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
     return Map<String, dynamic>.from(result);
   }
 
-  /// Logs out the current logged in user
+  /// Logout the current user.
   /// userLogout function on the native side is invoked
   @override
   Future<void> userLogout() async {
     await methodChannel.invokeMethod<void>('userLogout');
+  }
+  
+  /// Register a new account with email.
+  /// [countryCode], [email], [password], [code] details are passed to the native implementation
+  /// registerAccountWithEmail function on the native side is invoked
+  @override
+  Future<Map<String, dynamic>> registerAccountWithEmail({
+    required String countryCode,
+    required String email,
+    required String password,
+    required String code,
+  }) async {
+    final result = await methodChannel.invokeMethod<Map<dynamic, dynamic>>(
+      'registerAccountWithEmail',
+      <String, dynamic>{
+        'countryCode': countryCode,
+        'email': email,
+        'password': password,
+        'code': code,
+      },
+    );
+    return result?.cast<String, dynamic>() ?? {};
+  }
+  
+  /// Register a new account with phone.
+  /// [countryCode], [phone], [password], [code] details are passed to the native implementation
+  /// registerAccountWithPhone function on the native side is invoked
+  @override
+  Future<Map<String, dynamic>> registerAccountWithPhone({
+    required String countryCode,
+    required String phone,
+    required String password,
+    required String code,
+  }) async {
+    final result = await methodChannel.invokeMethod<Map<dynamic, dynamic>>(
+      'registerAccountWithPhone',
+      <String, dynamic>{
+        'countryCode': countryCode,
+        'phone': phone,
+        'password': password,
+        'code': code,
+      },
+    );
+    return result?.cast<String, dynamic>() ?? {};
   }
 
   /// Deletes the current user account.

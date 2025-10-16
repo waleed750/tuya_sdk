@@ -52,14 +52,7 @@ class AuthNeedsVerification extends AuthState {
   List<Object> get props => [email, password, lastChecked];
 }
 
-class AuthAuthenticated extends AuthState {
-  final AuthUser user;
-
-  const AuthAuthenticated({required this.user});
-
-  @override
-  List<Object> get props => [user];
-}
+final class AuthAuthenticated extends AuthState {}
 
 class AuthError extends AuthState {
   final String message;

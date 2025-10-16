@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -18,7 +20,7 @@ class AppRouter {
     redirect: (context, state) {
       final currentState = authCubit.state;
       final isAuthenticated = currentState is AuthAuthenticated;
-      final isAuthRoute = state.location == '/';
+      final isAuthRoute = state.name == '/';
 
       // If user is authenticated and trying to access auth page, redirect to devices
       if (isAuthenticated && isAuthRoute) {
@@ -33,20 +35,14 @@ class AppRouter {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const AuthPage(),
-      ),
+      GoRoute(path: '/', builder: (context, state) => const AuthPage()),
       GoRoute(
         path: '/devices',
         builder: (context, state) => const DevicesListPage(),
       ),
     ],
-    errorBuilder: (context, state) => Scaffold(
-      body: Center(
-        child: Text('Error: ${state.error}'),
-      ),
-    ),
+    errorBuilder: (context, state) =>
+        Scaffold(body: Center(child: Text('Error: ${state.error}'))),
   );
 }
 
@@ -57,8 +53,8 @@ class GoRouterRefreshStream extends ChangeNotifier {
 
   GoRouterRefreshStream(Stream<dynamic> stream) : _stream = stream {
     _subscription = _stream.asBroadcastStream().listen(
-          (_) => notifyListeners(),
-        );
+      (_) => notifyListeners(),
+    );
   }
 
   @override

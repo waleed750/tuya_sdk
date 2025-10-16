@@ -12,22 +12,10 @@ class DevicesInitial extends DevicesState {}
 class DevicesLoading extends DevicesState {}
 
 class DevicesRefreshing extends DevicesState {
-  final List<DeviceEntity> devices;
-
-  const DevicesRefreshing({required this.devices});
-
-  @override
-  List<Object> get props => [devices];
+  const DevicesRefreshing();
 }
 
-class DevicesLoaded extends DevicesState {
-  final List<DeviceEntity> devices;
-
-  const DevicesLoaded({required this.devices});
-
-  @override
-  List<Object> get props => [devices];
-}
+class DevicesLoaded extends DevicesState {}
 
 class DevicesError extends DevicesState {
   final String message;
@@ -37,3 +25,7 @@ class DevicesError extends DevicesState {
   @override
   List<Object> get props => [message];
 }
+
+class HomesLoaded extends DevicesState {}
+
+class HomesLoading extends DevicesState {}

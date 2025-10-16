@@ -8,10 +8,7 @@ import '../cubit/auth_cubit.dart';
 class AuthForm extends StatefulWidget {
   final bool isRegisterMode;
 
-  const AuthForm({
-    Key? key,
-    required this.isRegisterMode,
-  }) : super(key: key);
+  const AuthForm({super.key, required this.isRegisterMode});
 
   @override
   State<AuthForm> createState() => _AuthFormState();
@@ -21,12 +18,16 @@ class _AuthFormState extends State<AuthForm> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _countryCodeController = TextEditingController();
+  final _verificationCodeController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _countryCodeController.dispose();
+    _verificationCodeController.dispose();
     super.dispose();
   }
 
@@ -34,9 +35,14 @@ class _AuthFormState extends State<AuthForm> {
     if (_formKey.currentState?.validate() ?? false) {
       final email = _emailController.text.trim();
       final password = _passwordController.text;
-
+      final countryCode = _countryCodeController.text.trim();
       if (widget.isRegisterMode) {
-        context.read<AuthCubit>().startRegistration(email, password);
+        context.read<AuthCubit>().register(
+          email: email,
+          password: password,
+          countryCode: countryCode,
+          code: _verificationCodeController.text.trim(),
+        );
       } else {
         context.read<AuthCubit>().login(email, password);
       }
@@ -62,7 +68,7 @@ class _AuthFormState extends State<AuthForm> {
             ),
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            validator: (value) => validateEmail(value),
+            // validator: (value) => validateEmail(value),
           ),
           const SizedBox(height: 16),
           TextFormField(
@@ -90,6 +96,17 @@ class _AuthFormState extends State<AuthForm> {
             validator: (value) => validatePassword(value),
             onFieldSubmitted: (_) => _submitForm(),
           ),
+          TextField(
+            decoration: InputDecoration(
+              labelText: 'Country Code',
+              hintText: 'Enter your country code',
+              prefixIcon: const Icon(Icons.flag_outlined),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            textInputAction: TextInputAction.done,
+          ),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: _submitForm,
@@ -109,5 +126,25 @@ class _AuthFormState extends State<AuthForm> {
         ],
       ),
     );
+  }
+
+  String? validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter a password';
+    }
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters long';
+    }
+    return null;
+  }
+
+  String? validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter an email';
+    }
+    if (RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+      return 'Please enter a valid email address';
+    }
+    return null;
   }
 }

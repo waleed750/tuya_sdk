@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons_flutter/lucide_icons_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/app_colors.dart';
 import '../cubit/devices_cubit.dart';
 import '../widgets/device_tile.dart';
 
 class DevicesListPage extends StatefulWidget {
-  const DevicesListPage({Key? key}) : super(key: key);
+  const DevicesListPage({super.key});
 
   @override
   State<DevicesListPage> createState() => _DevicesListPageState();
@@ -37,34 +37,37 @@ class _DevicesListPageState extends State<DevicesListPage> {
               ),
             );
           } else if (state is DevicesRefreshing || state is DevicesLoaded) {
-            final devices = state is DevicesRefreshing
-                ? state.devices
-                : (state as DevicesLoaded).devices;
-
+            // final devices = state is DevicesRefreshing
+            //     ? state.devices
+            //     : (state as DevicesLoaded).devices;
+            final devices = [];
             if (devices.isEmpty) {
               return _buildEmptyState();
             }
 
             return RefreshIndicator(
-              onRefresh: () => context.read<DevicesCubit>().refreshDevices(),
+              onRefresh: () async {
+                context.read<DevicesCubit>().loadDevices();
+              },
               color: AppColors.primary,
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: devices.length,
                 itemBuilder: (context, index) {
                   final device = devices[index];
-                  return DeviceTile(
-                    device: device,
-                    onTap: () {
-                      // Device detail navigation would go here
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Selected ${device.name}'),
-                          duration: const Duration(seconds: 1),
-                        ),
-                      );
-                    },
-                  );
+                  return SizedBox.shrink();
+                  // return DeviceTile(
+                  //   device: device,
+                  //   onTap: () {
+                  //     // Device detail navigation would go here
+                  //     ScaffoldMessenger.of(context).showSnackBar(
+                  //       SnackBar(
+                  //         content: Text('Selected ${device.name}'),
+                  //         duration: const Duration(seconds: 1),
+                  //       ),
+                  //     );
+                  //   },
+                  // );
                 },
               ),
             );
@@ -80,17 +83,15 @@ class _DevicesListPageState extends State<DevicesListPage> {
 
   Widget _buildEmptyState() {
     return RefreshIndicator(
-      onRefresh: () => context.read<DevicesCubit>().refreshDevices(),
+      onRefresh: () async {
+        context.read<DevicesCubit>().loadDevices();
+      },
       color: AppColors.primary,
       child: ListView(
         padding: const EdgeInsets.all(24),
         children: [
           const SizedBox(height: 80),
-          const Icon(
-            LucideIcons.list,
-            size: 64,
-            color: AppColors.neutral400,
-          ),
+          const Icon(LucideIcons.list, size: 64, color: AppColors.neutral400),
           const SizedBox(height: 24),
           const Text(
             'No devices found',
@@ -104,18 +105,15 @@ class _DevicesListPageState extends State<DevicesListPage> {
           const SizedBox(height: 16),
           const Text(
             'Add devices to your Tuya Smart Home to see them here',
-            style: TextStyle(
-              fontSize: 16,
-              color: AppColors.neutral600,
-            ),
+            style: TextStyle(fontSize: 16, color: AppColors.neutral600),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () {
-              context.read<DevicesCubit>().refreshDevices();
+              // context.read<DevicesCubit>().refreshDevices();
             },
-            icon: const Icon(LucideIcons.refreshCw),
+            icon: Icon(LucideIcons.refreshCw),
             label: const Text('Refresh'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
@@ -133,17 +131,13 @@ class _DevicesListPageState extends State<DevicesListPage> {
 
   Widget _buildErrorState(String message) {
     return RefreshIndicator(
-      onRefresh: () => context.read<DevicesCubit>().refreshDevices(),
+      onRefresh: () => context.read<DevicesCubit>().loadDevices(),
       color: AppColors.primary,
       child: ListView(
         padding: const EdgeInsets.all(24),
         children: [
           const SizedBox(height: 80),
-          const Icon(
-            LucideIcons.alertCircle,
-            size: 64,
-            color: AppColors.error,
-          ),
+          const Icon(LucideIcons.badgeInfo, size: 64, color: AppColors.error),
           const SizedBox(height: 24),
           const Text(
             'Error loading devices',
@@ -157,10 +151,7 @@ class _DevicesListPageState extends State<DevicesListPage> {
           const SizedBox(height: 16),
           Text(
             message,
-            style: const TextStyle(
-              fontSize: 16,
-              color: AppColors.neutral600,
-            ),
+            style: const TextStyle(fontSize: 16, color: AppColors.neutral600),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),

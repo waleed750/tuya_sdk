@@ -7,7 +7,7 @@ import '../widgets/auth_form.dart';
 import '../widgets/verify_wait_sheet.dart';
 
 class AuthPage extends StatelessWidget {
-  const AuthPage({Key? key}) : super(key: key);
+  const AuthPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,20 +27,21 @@ class AuthPage extends StatelessWidget {
         },
         builder: (context, state) {
           return SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 40),
-                  _buildHeader(context, state),
-                  const SizedBox(height: 40),
-                  if (state is AuthIdle) _buildSegmentedControl(context, state),
-                  const SizedBox(height: 32),
-                  Expanded(
-                    child: _buildContent(context, state),
-                  ),
-                ],
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 40),
+                    _buildHeader(context, state),
+                    const SizedBox(height: 40),
+                    if (state is AuthIdle)
+                      _buildSegmentedControl(context, state),
+                    const SizedBox(height: 32),
+                    _buildContent(context, state),
+                  ],
+                ),
               ),
             ),
           );
@@ -51,25 +52,25 @@ class AuthPage extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context, AuthState state) {
     final isRegisterMode = state is AuthIdle ? state.isRegisterMode : false;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           isRegisterMode ? 'Create Account' : 'Welcome Back',
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.neutral900,
-              ),
+            fontWeight: FontWeight.bold,
+            color: AppColors.neutral900,
+          ),
         ),
         const SizedBox(height: 8),
         Text(
           isRegisterMode
               ? 'Sign up to get started with Tuya Smart Home'
               : 'Sign in to access your Tuya Smart Home',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.neutral600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(color: AppColors.neutral600),
         ),
       ],
     );
@@ -140,40 +141,39 @@ class AuthPage extends StatelessWidget {
 
   Widget _buildContent(BuildContext context, AuthState state) {
     if (state is AuthLoading) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              state.message ?? 'Loading...',
-              style: const TextStyle(color: AppColors.neutral700),
-            ),
-          ],
-        ),
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            state.message ?? 'Loading...',
+            style: const TextStyle(color: AppColors.neutral700),
+          ),
+        ],
       );
     } else if (state is AuthIdle) {
       return AuthForm(isRegisterMode: state.isRegisterMode);
     }
-    
+
     // Default empty container for other states
     return Container();
   }
 
-  void _showVerificationSheet(BuildContext context, AuthNeedsVerification state) {
+  void _showVerificationSheet(
+    BuildContext context,
+    AuthNeedsVerification state,
+  ) {
     showModalBottomSheet(
       context: context,
       isDismissible: false,
       enableDrag: false,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => VerifyWaitSheet(
-        email: state.email,
-        lastChecked: state.lastChecked,
-      ),
+      builder: (context) =>
+          VerifyWaitSheet(email: state.email, lastChecked: state.lastChecked),
     );
   }
 }

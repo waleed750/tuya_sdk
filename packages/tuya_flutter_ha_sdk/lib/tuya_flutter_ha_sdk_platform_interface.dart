@@ -47,12 +47,30 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
   /// returns true if logged in and false if not logged in
   Future<bool> checkLogin();
 
-  /// Get the current user’s info. Throws if no user is logged in.
+  /// Get the current user's info. Throws if no user is logged in.
   /// returns a map with all the user details
   Future<Map<String, dynamic>> getCurrentUser();
 
   /// Logs out the current user.
   Future<void> userLogout();
+  
+  /// Register a new account with email.
+  /// [countryCode], [email], [password], [code] details are passed to the native implementation
+  Future<Map<String, dynamic>> registerAccountWithEmail({
+    required String countryCode,
+    required String email,
+    required String password,
+    required String code,
+  });
+  
+  /// Register a new account with phone.
+  /// [countryCode], [phone], [password], [code] details are passed to the native implementation
+  Future<Map<String, dynamic>> registerAccountWithPhone({
+    required String countryCode,
+    required String phone,
+    required String password,
+    required String code,
+  });
 
   /// Deletes the current user account.
   Future<void> deleteAccount();

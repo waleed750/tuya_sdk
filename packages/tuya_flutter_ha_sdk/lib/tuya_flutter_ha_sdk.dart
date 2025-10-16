@@ -224,6 +224,124 @@ class TuyaFlutterHaSdk {
   static Future<void> userLogout() {
     return TuyaFlutterHaSdkPlatform.instance.userLogout();
   }
+  
+  /// Register a new account with email.
+  ///
+  /// The [email] parameter is the email address of the user.
+  /// The [password] parameter is the password for the account.
+  /// The [countryCode] parameter is the country code (e.g., "1" for US).
+  /// The [code] parameter is the verification code sent to the email.
+  ///
+  /// Returns a Map containing user information on success.
+  ///
+  /// Example Usage:
+  /// ```dart
+  /// Map<String,dynamic> result = await registerAccountWithEmail(
+  ///   email: 'user@example.com', 
+  ///   countryCode: '1', 
+  ///   password: 'password123',
+  ///   code: '123456'
+  /// );
+  /// print(result);
+  /// ```
+  ///
+  /// Throws [PlatformException] on failure.
+  static Future<Map<String, dynamic>> registerAccountWithEmail({
+    required String countryCode,
+    required String email,
+    required String password,
+    required String code,
+  }) {
+    if (countryCode.isEmpty) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "countryCode cannot be empty",
+      );
+    }
+    if (email.isEmpty) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "email cannot be empty",
+      );
+    }
+    if (password.isEmpty) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "password cannot be empty",
+      );
+    }
+    if (code.isEmpty) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "verification code cannot be empty",
+      );
+    }
+    return TuyaFlutterHaSdkPlatform.instance.registerAccountWithEmail(
+      countryCode: countryCode,
+      email: email,
+      password: password,
+      code: code,
+    );
+  }
+  
+  /// Register a new account with phone number.
+  ///
+  /// The [phone] parameter is the phone number of the user.
+  /// The [password] parameter is the password for the account.
+  /// The [countryCode] parameter is the country code (e.g., "1" for US).
+  /// The [code] parameter is the verification code sent to the phone.
+  ///
+  /// Returns a Map containing user information on success.
+  ///
+  /// Example Usage:
+  /// ```dart
+  /// Map<String,dynamic> result = await registerAccountWithPhone(
+  ///   phone: '1234567890', 
+  ///   countryCode: '1', 
+  ///   password: 'password123',
+  ///   code: '123456'
+  /// );
+  /// print(result);
+  /// ```
+  ///
+  /// Throws [PlatformException] on failure.
+  static Future<Map<String, dynamic>> registerAccountWithPhone({
+    required String countryCode,
+    required String phone,
+    required String password,
+    required String code,
+  }) {
+    if (countryCode.isEmpty) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "countryCode cannot be empty",
+      );
+    }
+    if (phone.isEmpty) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "phone cannot be empty",
+      );
+    }
+    if (password.isEmpty) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "password cannot be empty",
+      );
+    }
+    if (code.isEmpty) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "verification code cannot be empty",
+      );
+    }
+    return TuyaFlutterHaSdkPlatform.instance.registerAccountWithPhone(
+      countryCode: countryCode,
+      phone: phone,
+      password: password,
+      code: code,
+    );
+  }
 
   /// Deletes (deactivates) the current user account.
   /// Example usage:

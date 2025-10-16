@@ -22,6 +22,8 @@ import com.thingclips.smart.android.user.api.ILogoutCallback;
 import com.thingclips.smart.sdk.api.IResultCallback;
 import com.thingclips.smart.sdk.enums.TempUnitEnum;
 import com.thingclips.smart.android.user.api.IReNickNameCallback;
+// Import for registration callback
+import com.thingclips.smart.android.user.api.IRegisterCallback;
 import com.thingclips.smart.home.sdk.bean.HomeBean;
 import com.thingclips.smart.home.sdk.callback.IThingHomeResultCallback;
 import com.thingclips.smart.home.sdk.callback.IThingGetHomeListCallback;
@@ -299,6 +301,70 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                 } else {
                     result.error("NO_USER", "No user is currently logged in", "");
                 }
+                break;
+                
+            case "registerAccountWithEmail":
+                // Register by email using Tuya SDK
+                String regEmailCountryCode = call.argument("countryCode");
+                String regEmail = call.argument("email");
+                String regEmailPassword = call.argument("password");
+                String regEmailCode = call.argument("code");
+                
+                if (regEmailCountryCode == null || regEmail == null || regEmailPassword == null || regEmailCode == null) {
+                    result.error("MISSING_ARGS", "countryCode, email, password, code required", null);
+                    return;
+                }
+                
+                ThingHomeSdk.getUserInstance().registerAccountWithEmail(
+                    regEmailCountryCode,
+                    regEmail,
+                    regEmailPassword,
+                    regEmailCode,
+                    new IRegisterCallback() {
+                        public void onSuccess(User user) {
+                            Map<String, Object> resp = new HashMap<>();
+                            resp.put("email", user.getEmail());
+                            resp.put("uid", user.getUid());
+                            result.success(resp);
+                        }
+
+                        public void onError(String code, String error) {
+                            result.error("REGISTER_FAILED", error + " (code: " + code + ")", null);
+                        }
+                    }
+                );
+                break;
+                
+            case "registerAccountWithPhone":
+                // Register by phone using Tuya SDK
+                String regPhoneCountryCode = call.argument("countryCode");
+                String regPhone = call.argument("phone");
+                String regPhonePassword = call.argument("password");
+                String regPhoneCode = call.argument("code");
+                
+                if (regPhoneCountryCode == null || regPhone == null || regPhonePassword == null || regPhoneCode == null) {
+                    result.error("MISSING_ARGS", "countryCode, phone, password, code required", null);
+                    return;
+                }
+                
+                ThingHomeSdk.getUserInstance().registerAccountWithPhone(
+                    regPhoneCountryCode,
+                    regPhone,
+                    regPhonePassword,
+                    regPhoneCode,
+                    new IRegisterCallback() {
+                        public void onSuccess(User user) {
+                            Map<String, Object> resp = new HashMap<>();
+                            resp.put("phone", user.getMobile());
+                            resp.put("uid", user.getUid());
+                            result.success(resp);
+                        }
+
+                        public void onError(String code, String error) {
+                            result.error("REGISTER_FAILED", error + " (code: " + code + ")", null);
+                        }
+                    }
+                );
                 break;
             case "userLogout":
                 // logout function of the Tuya SDK is called

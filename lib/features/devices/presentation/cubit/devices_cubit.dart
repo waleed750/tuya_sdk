@@ -1,44 +1,35 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../domain/entities/device_entity.dart';
-import '../../domain/usecases/list_devices_usecase.dart';
+import 'package:tuya_flutter_ha_sdk/models/user_model.dart';
+import 'package:tuya_flutter_ha_sdk/tuya_flutter_ha_sdk.dart';
 
 part 'devices_state.dart';
 
 class DevicesCubit extends Cubit<DevicesState> {
-  final ListDevicesUseCase _listDevicesUseCase;
+  DevicesCubit() : super(DevicesInitial());
 
-  DevicesCubit({
-    required ListDevicesUseCase listDevicesUseCase,
-  })  : _listDevicesUseCase = listDevicesUseCase,
-        super(DevicesInitial());
+  int? currentHomeId;
+  Future<void> loadHomes() async {
+    emit(DevicesLoading());
+    final homes = await TuyaFlutterHaSdk.getHomeList();
+    if (homes.isEmpty) {
+      emit(DevicesError(message: 'No homes found'));
+      return;
+    } else {
+      emit(HomesLoaded());
+    }
+  }
 
   Future<void> loadDevices() async {
     emit(DevicesLoading());
-
-    final result = await _listDevicesUseCase();
-
-    result.fold(
-      (failure) => emit(DevicesError(message: failure.message)),
-      (devices) => emit(DevicesLoaded(devices: devices)),
+    final devices = await TuyaFlutterHaSdk.getHomeDevices(
+      homeId: currentHomeId ?? 0,
     );
-  }
-
-  Future<void> refreshDevices() async {
-    // Keep current devices visible during refresh
-    final currentState = state;
-    if (currentState is DevicesLoaded) {
-      emit(DevicesRefreshing(devices: currentState.devices));
+    if (devices.isEmpty) {
+      emit(DevicesError(message: 'No devices found'));
+      return;
     } else {
-      emit(DevicesLoading());
+      emit(DevicesLoaded());
     }
-
-    final result = await _listDevicesUseCase();
-
-    result.fold(
-      (failure) => emit(DevicesError(message: failure.message)),
-      (devices) => emit(DevicesLoaded(devices: devices)),
-    );
   }
 }

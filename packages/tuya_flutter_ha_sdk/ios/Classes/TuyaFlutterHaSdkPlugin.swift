@@ -170,6 +170,64 @@ public class TuyaFlutterHaSdkPlugin: NSObject, FlutterPlugin {
                 result(FlutterError(code: "LOGOUT_FAILED", message: msg, details: nil))
             })
             
+        case "registerAccountWithEmail":
+            // Register by email using Tuya SDK
+            guard
+                let args = call.arguments as? [String: Any],
+                let countryCode = args["countryCode"] as? String,
+                let email = args["email"] as? String,
+                let password = args["password"] as? String,
+                let code = args["code"] as? String
+            else {
+                result(FlutterError(code: "MISSING_ARGS",
+                                    message: "countryCode, email, password, code required",
+                                    details: nil))
+                return
+            }
+            
+            ThingSmartUser.sharedInstance().register(byEmail: email, 
+                                                   countryCode: countryCode, 
+                                                   password: password, 
+                                                   code: code, 
+                                                   success: { userId in
+                result([
+                    "uid": userId,
+                    "email": email
+                ])
+            }, failure: { error in
+                let msg = error?.localizedDescription ?? "Unknown error"
+                result(FlutterError(code: "REGISTER_FAILED", message: msg, details: nil))
+            })
+            
+        case "registerAccountWithPhone":
+            // Register by phone using Tuya SDK
+            guard
+                let args = call.arguments as? [String: Any],
+                let countryCode = args["countryCode"] as? String,
+                let phone = args["phone"] as? String,
+                let password = args["password"] as? String,
+                let code = args["code"] as? String
+            else {
+                result(FlutterError(code: "MISSING_ARGS",
+                                    message: "countryCode, phone, password, code required",
+                                    details: nil))
+                return
+            }
+            
+            ThingSmartUser.sharedInstance().register(byPhone: phone, 
+                                                   countryCode: countryCode, 
+                                                   password: password, 
+                                                   code: code, 
+                                                   success: { userId in
+                result([
+                    "uid": userId,
+                    "phone": phone
+                ])
+            }, failure: { error in
+                let msg = error?.localizedDescription ?? "Unknown error"
+                result(FlutterError(code: "REGISTER_FAILED", message: msg, details: nil))
+            })
+            
         case "deleteAccount":
             // cancelAccount function of the Tuya SDK is called
             ThingSmartUser.sharedInstance().cancelAccount({

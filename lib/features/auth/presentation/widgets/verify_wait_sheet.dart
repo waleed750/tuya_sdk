@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons_flutter/lucide_icons_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/app_colors.dart';
 import '../cubit/auth_cubit.dart';
@@ -28,18 +28,14 @@ class VerifyWaitSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const Center(
-            child: Icon(
-              LucideIcons.mail,
-              size: 48,
-              color: AppColors.primary,
-            ),
+            child: Icon(LucideIcons.mail, size: 48, color: AppColors.primary),
           ),
           const SizedBox(height: 16),
           Text(
             'Verify your email',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
@@ -53,7 +49,7 @@ class VerifyWaitSheet extends StatelessWidget {
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () {
-              context.read<AuthCubit>().manualCheckVerification();
+              // context.read<AuthCubit>().manualCheckVerification();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
@@ -111,9 +107,9 @@ class VerifyWaitSheet extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 timeText,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.neutral700,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: AppColors.neutral700),
               ),
             ],
           ),
@@ -125,10 +121,7 @@ class VerifyWaitSheet extends StatelessWidget {
           const SizedBox(height: 8),
           const Text(
             'Checking automatically every 5 seconds',
-            style: TextStyle(
-              fontSize: 12,
-              color: AppColors.neutral600,
-            ),
+            style: TextStyle(fontSize: 12, color: AppColors.neutral600),
           ),
         ],
       ),
