@@ -27,6 +27,7 @@ class _DevicesListPageState extends State<DevicesListPage> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
+
       body: BlocBuilder<DevicesCubit, DevicesState>(
         builder: (context, state) {
           if (state is DevicesInitial || state is DevicesLoading) {

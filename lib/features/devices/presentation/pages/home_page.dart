@@ -3,6 +3,7 @@ import 'package:example/features/devices/presentation/cubit/devices_cubit.dart';
 import 'package:example/features/devices/presentation/pages/devices_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tuya_flutter_ha_sdk/models/thing_smart_home_model.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -59,13 +60,25 @@ class _HomePageState extends State<HomePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                home.name ?? 'Unnamed Home',
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    home.name ?? 'Unnamed Home',
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  Icon(
+                                    home.homeStatus == HomeJoinStatus.accepted
+                                        ? Icons.home
+                                        : Icons.home_outlined,
+                                    color: Colors.white,
+                                  ),
+                                ],
                               ),
                               Text(
                                 'ID: ${home.homeId}',
@@ -84,8 +97,7 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    "${home.geoName}  : ${home.lat}, ${home.lon}" ??
-                                        'Unknown Location',
+                                    "${home.geoName}  : ${home.lat}, ${home.lon}",
                                     style: const TextStyle(
                                       fontSize: 16,
                                       color: Colors.white70,

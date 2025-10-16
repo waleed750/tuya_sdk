@@ -6,6 +6,23 @@ import 'dart:convert';
 /// {geoName: saudi, inviteName: null, roomIds: , role: 2, managementStatus: true,
 ///  background: , name: home, admin: true, lon: 0.0, homeStatus: 2,
 ///  homeId: 256961959, lat: 0.0}
+///
+///
+enum HomeJoinStatus { pending, accepted, rejected, unknown }
+
+HomeJoinStatus mapHomeStatus(int? v) {
+  switch (v) {
+    case 1:
+      return HomeJoinStatus.pending;
+    case 2:
+      return HomeJoinStatus.accepted;
+    case 3:
+      return HomeJoinStatus.rejected;
+    default:
+      return HomeJoinStatus.unknown;
+  }
+}
+
 class ThingSmartHomeModel {
   final String? geoName;
   final String? inviteName;
@@ -16,7 +33,7 @@ class ThingSmartHomeModel {
   final String? name;
   final bool? admin;
   final double? lon;
-  final int? homeStatus;
+  final HomeJoinStatus? homeStatus;
   final int? homeId;
   final double? lat;
 
@@ -53,7 +70,7 @@ class ThingSmartHomeModel {
       name = (json['name'] ?? '').toString(),
       admin = _boolFrom(json['admin']),
       lon = _doubleFrom(json['lon']),
-      homeStatus = _intFrom(json['homeStatus']),
+      homeStatus = mapHomeStatus(_intFrom(json['homeStatus'])),
       homeId = _intFrom(json['homeId']),
       lat = _doubleFrom(json['lat']);
 
@@ -67,7 +84,7 @@ class ThingSmartHomeModel {
     String? name,
     bool? admin,
     double? lon,
-    int? homeStatus,
+    HomeJoinStatus? homeStatus,
     int? homeId,
     double? lat,
   }) {
