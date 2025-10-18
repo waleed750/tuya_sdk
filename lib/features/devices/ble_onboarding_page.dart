@@ -1,9 +1,11 @@
+import 'package:example/core/app_colors.dart';
+import 'package:example/features/devices/data/model/discover_device_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../services/permissions_service.dart';
-import '../../services/tuya_onboarding_service.dart';
 import 'connection_cubit.dart' as connection;
 import 'widgets/device_discovery_list.dart';
+import 'package:example/features/devices/presentation/cubit/devices_cubit.dart';
 
 class BleOnboardingPage extends StatefulWidget {
   const BleOnboardingPage({Key? key}) : super(key: key);
@@ -14,11 +16,6 @@ class BleOnboardingPage extends StatefulWidget {
 
 class _BleOnboardingPageState extends State<BleOnboardingPage> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void dispose() {
     context.read<connection.ConnecitonCubit>().stopBleScan();
     super.dispose();
@@ -26,46 +23,69 @@ class _BleOnboardingPageState extends State<BleOnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final conn = context.watch<connection.ConnecitonCubit>();
+    final devicesCubit = context.read<DevicesCubit>();
+    final isScanning = conn.isScanning;
+
     return Scaffold(
-      appBar: AppBar(title: Text('Add via Bluetooth')),
+      appBar: AppBar(title: const Text('Add via Bluetooth')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Text('Scanning for nearby BLE devices...'),
-            SizedBox(height: 12),
-            Row(
-              children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    final ok = await PermissionsService.instance
-                        .ensureBlePermissions(context);
-                    if (!ok) return;
-                    await context
-                        .read<connection.ConnecitonCubit>()
-                        .startBleScan();
-                  },
-                  child: Text('Start Scan'),
-                ),
-                SizedBox(width: 12),
-                OutlinedButton(
-                  onPressed: () async {
-                    await context
-                        .read<connection.ConnecitonCubit>()
-                        .stopBleScan();
-                  },
-                  child: Text('Stop'),
-                ),
-              ],
+            const Text('Scanning for nearby Tuya BLE devices…'),
+            const SizedBox(height: 12),
+            Container(
+              height: 50,
+              child: Row(
+                spacing: 10,
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+
+                        foregroundColor: Colors.white,
+                        overlayColor: Colors.white24,
+                      ),
+                      onPressed: isScanning
+                          ? null
+                          : () async {
+                              final ok = await PermissionsService.instance
+                                  .ensureBlePermissions(context);
+                              if (!ok) return;
+                              await context
+                                  .read<connection.ConnecitonCubit>()
+                                  .startBleScan(timeoutSeconds: 30);
+                            },
+                      child: const Text('Start Scan'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: isScanning
+                          ? () async {
+                              await context
+                                  .read<connection.ConnecitonCubit>()
+                                  .stopBleScan();
+                            }
+                          : null,
+                      child: const Text('Stop'),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            SizedBox(height: 12),
-            Expanded(
+            const SizedBox(height: 12),
+            Container(
+              height: 300,
               child:
                   BlocConsumer<
                     connection.ConnecitonCubit,
                     connection.ConnectionState
                   >(
-                    listener: (ctx, state) {
+                    listener: (ctx, state) async {
                       if (state is connection.OnboardingError) {
                         ScaffoldMessenger.of(
                           ctx,
@@ -77,33 +97,51 @@ class _BleOnboardingPageState extends State<BleOnboardingPage> {
                             content: Text('Paired ${state.device.name}'),
                           ),
                         );
-                        Navigator.of(ctx).popUntil((route) => route.isFirst);
+                        // Optional: refresh your home’s devices list after pairing
+                        await ctx.read<DevicesCubit>().loadDevices();
+                        if (ctx.mounted) {
+                          Navigator.of(ctx).pop();
+                        }
                       }
                     },
                     builder: (ctx, state) {
                       if (state is connection.OnboardingScanning) {
                         return Column(
                           children: [
-                            LinearProgressIndicator(),
-                            SizedBox(height: 8),
-                            Text('Scanning... ${state.secondsLeft}s left'),
-                            Expanded(
-                              child: DeviceDiscoveryList(
-                                devices: const [],
-                                onPair: (d) => _showPairDialog(ctx, d),
-                              ),
-                            ),
+                            const LinearProgressIndicator(),
+                            const SizedBox(height: 8),
+                            Text('Scanning… ${state.secondsLeft}s left'),
+                            const Spacer(),
                           ],
                         );
                       }
+
                       if (state is connection.OnboardingDevicesFound) {
                         return DeviceDiscoveryList(
                           devices: state.devices,
-                          onPair: (d) => _showPairDialog(ctx, d),
+                          // ⬇️ Immediate pairing on tap — no dialog.
+                          onPair: (DiscoveredDevice d) async {
+                            final homeId = devicesCubit.currentHomeId;
+                            if (homeId == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please select a Home first'),
+                                ),
+                              );
+                              return;
+                            }
+                            await context
+                                .read<connection.ConnecitonCubit>()
+                                .pairSelected(
+                                  d,
+                                  homeId: homeId, // required for BLE binding
+                                );
+                          },
                         );
                       }
-                      return Center(
-                        child: Text('Tap Start Scan to find BLE devices.'),
+
+                      return const Center(
+                        child: Text('Tap “Start Scan” to find BLE devices.'),
                       );
                     },
                   ),
@@ -112,40 +150,5 @@ class _BleOnboardingPageState extends State<BleOnboardingPage> {
         ),
       ),
     );
-  }
-
-  Future<void> _showPairDialog(
-    BuildContext ctx,
-    DiscoveredDevice device,
-  ) async {
-    final confirmed = await showModalBottomSheet<bool>(
-      context: ctx,
-      builder: (c) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Put device in pairing mode then tap Pair.'),
-              SizedBox(height: 12),
-              ElevatedButton(
-                onPressed: () async {
-                  Navigator.of(c).pop(true);
-                },
-                child: Text('Pair'),
-              ),
-              SizedBox(height: 8),
-              TextButton(
-                onPressed: () => Navigator.of(c).pop(false),
-                child: Text('Cancel'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-    if (confirmed == true) {
-      await context.read<connection.ConnecitonCubit>().pairSelected(device);
-    }
   }
 }

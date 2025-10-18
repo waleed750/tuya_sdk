@@ -61,9 +61,6 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // TODO: Show add home dialog/sheet
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Add home coming soon')));
         },
         child: Icon(Icons.add),
       ),

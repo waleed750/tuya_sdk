@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../services/tuya_onboarding_service.dart';
+import '../data/model/discover_device_model.dart';
 
 class DeviceDiscoveryList extends StatelessWidget {
   final List<DiscoveredDevice> devices;
@@ -13,9 +14,6 @@ class DeviceDiscoveryList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (devices.isEmpty) {
-      return Center(child: Text('No devices found.'));
-    }
     return ListView.separated(
       itemCount: devices.length,
       separatorBuilder: (_, _) => Divider(height: 1),
@@ -23,9 +21,9 @@ class DeviceDiscoveryList extends StatelessWidget {
       itemBuilder: (ctx, i) {
         final d = devices[i];
         return ListTile(
-          leading: CircleAvatar(child: Icon(d.icon ?? Icons.device_unknown)),
+          leading: CircleAvatar(child: Icon(Icons.device_unknown)),
           title: Text(d.name),
-          subtitle: Text(d.rssi != null ? 'RSSI ${d.rssi} • ${d.id}' : d.id),
+          subtitle: Text('• ${d.id}'),
           trailing: Icon(Icons.chevron_right),
           onTap: () => onPair(d),
         );
