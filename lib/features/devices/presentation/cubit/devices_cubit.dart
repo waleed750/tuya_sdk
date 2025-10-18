@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:equatable/equatable.dart';
@@ -17,6 +18,12 @@ class DevicesCubit extends Cubit<DevicesState> {
   List<ThingSmartHomeModel>? currentHomes;
   ThingSmartUserModel? currentDevice;
   String? currentSSID;
+
+  Timer? _scanTimer;
+  Timer? _pollTimer;
+  bool _isScanning = false;
+
+  bool get isScanning => _isScanning;
 
   Future<void> getCurrentSSID() async {
     try {
@@ -47,7 +54,7 @@ class DevicesCubit extends Cubit<DevicesState> {
     }
   }
 
-  setHomeId(int homeId) {
+  void setHomeId(int homeId) {
     currentHomeId = homeId;
     emit(HomeSelected());
   }
@@ -63,10 +70,5 @@ class DevicesCubit extends Cubit<DevicesState> {
     } else {
       emit(DevicesLoaded());
     }
-  }
-
-  void setCurrentDevice(ThingSmartUserModel device) {
-    currentDevice = device;
-    emit(DevicesLoaded());
   }
 }

@@ -16,6 +16,16 @@ class WifiOnboardingPage extends StatefulWidget {
 }
 
 class _WifiOnboardingPageState extends State<WifiOnboardingPage> {
+  late final TextEditingController _wifiSSIDController;
+  late final TextEditingController _wifiPasswordController;
+
+  @override
+  void initState() {
+    _wifiSSIDController = TextEditingController();
+    _wifiPasswordController = TextEditingController();
+    super.initState();
+  }
+
   @override
   void dispose() {
     context.read<connection.ConnecitonCubit>().stopWifiScan();
@@ -41,6 +51,22 @@ class _WifiOnboardingPageState extends State<WifiOnboardingPage> {
                 fontWeight: FontWeight.bold,
                 color: AppColors.deviceOnline,
               ),
+            ),
+            TextFormField(
+              controller: _wifiSSIDController,
+              decoration: InputDecoration(
+                labelText: 'Wi‑Fi SSID',
+                border: OutlineInputBorder(),
+              ),
+            ),
+
+            TextFormField(
+              controller: _wifiPasswordController,
+              decoration: InputDecoration(
+                labelText: 'Wi‑Fi Password',
+                border: OutlineInputBorder(),
+              ),
+              obscureText: false,
             ),
             Row(
               spacing: 10,
