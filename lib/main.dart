@@ -8,6 +8,8 @@ import 'core/router.dart';
 import 'core/theme.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/devices/presentation/cubit/devices_cubit.dart';
+import 'features/devices/connection_cubit.dart';
+import 'features/home/presentation/cubit/home_cubit.dart';
 import 'tuya_configuration.dart';
 
 Future<void> main() async {
@@ -41,7 +43,8 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => AuthCubit()..automateLogin()),
-        BlocProvider(create: (context) => DevicesCubit()),
+        BlocProvider(create: (context) => DevicesCubit()..getCurrentSSID()),
+        BlocProvider(create: (context) => ConnecitonCubit()),
       ],
       child: Builder(
         builder: (context) {

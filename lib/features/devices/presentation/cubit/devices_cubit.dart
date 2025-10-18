@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tuya_flutter_ha_sdk/models/user_model.dart';
 import 'package:tuya_flutter_ha_sdk/models/thing_smart_home_model.dart';
@@ -15,6 +16,22 @@ class DevicesCubit extends Cubit<DevicesState> {
   int? currentHomeId;
   List<ThingSmartHomeModel>? currentHomes;
   ThingSmartUserModel? currentDevice;
+  String? currentSSID;
+
+  Future<void> getCurrentSSID() async {
+    try {
+      final ssid = await TuyaFlutterHaSdk.getSSID();
+      currentSSID = ssid;
+      log("← getSSID SUCCESS: ssid=$ssid ");
+    } on PlatformException catch (e) {
+      log(
+        "ERROR getSSID PlatformException -> code=${e.code}, message=${e.message}",
+      );
+    } catch (e) {
+      log("⛔ getSSID FAILED: $e");
+    }
+    emit(SSIDLoaded());
+  }
 
   Future<void> loadHomes() async {
     emit(DevicesLoading());
