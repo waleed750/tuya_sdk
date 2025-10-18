@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../cubit/home_cubit.dart';
 
 class HomePage extends StatelessWidget {
@@ -16,7 +17,7 @@ class HomePage extends StatelessWidget {
             icon: Icon(Icons.logout),
             onPressed: () {
               // TODO: Implement logout via AuthCubit
-              context.go('/auth');
+              context.goNamed('auth');
             },
           ),
         ],
@@ -41,7 +42,6 @@ class HomePage extends StatelessWidget {
           );
         },
       ),
-     
     );
   }
 }

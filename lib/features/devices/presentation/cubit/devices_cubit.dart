@@ -40,17 +40,24 @@ class DevicesCubit extends Cubit<DevicesState> {
     emit(SSIDLoaded());
   }
 
-  Future<void> addNewHome(String name) async {
+  Future<void> addNewHome({
+    required String name,
+    required String address,
+    double latitude = 0.0,
+    double longitude = 0.0,
+  }) async {
     emit(DevicesLoading());
     try {
-      final homeId = await TuyaFlutterHaSdk.createHome(name: name);
-      if (homeId != null) {
-        log("✅ Home created with ID: $homeId");
-        await loadHomes(); // Refresh the homes list
-      } else {
-        log("⛔ Home creation failed: No ID returned");
-        emit(DevicesError(message: 'Home creation failed'));
-      }
+      final homeId = await TuyaFlutterHaSdk.createHome(
+        name: name,
+        geoName: address,
+        latitude: latitude,
+        longitude: longitude,
+        rooms: [],
+      );
+      log("✅ Home created with ID: $homeId");
+      emit(HomeAdded());
+      await loadHomes(); // Refresh the homes list
     } catch (e) {
       log("⛔ Home creation FAILED: $e");
       emit(DevicesError(message: 'Home creation failed: $e'));

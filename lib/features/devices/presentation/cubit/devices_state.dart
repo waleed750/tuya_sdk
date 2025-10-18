@@ -33,3 +33,5 @@ final class HomesLoading extends DevicesState {}
 final class HomeSelected extends DevicesState {}
 
 final class SSIDLoaded extends DevicesState {}
+
+class HomeAdded extends DevicesState {}

@@ -9,8 +9,8 @@ import 'core/theme.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/devices/presentation/cubit/devices_cubit.dart';
 import 'features/devices/connection_cubit.dart';
-import 'features/home/presentation/cubit/home_cubit.dart';
 import 'tuya_configuration.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,13 +48,15 @@ class MyApp extends StatelessWidget {
       ],
       child: Builder(
         builder: (context) {
-          return MaterialApp.router(
-            title: 'Tuya Smart Home',
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: ThemeMode.system,
-            routerConfig: appRouter.router,
-            debugShowCheckedModeBanner: false,
+          return GlobalLoaderOverlay(
+            child: MaterialApp.router(
+              title: 'Tuya Smart Home',
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: ThemeMode.system,
+              routerConfig: appRouter.router,
+              debugShowCheckedModeBanner: false,
+            ),
           );
         },
       ),

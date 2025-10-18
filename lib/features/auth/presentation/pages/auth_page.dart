@@ -42,8 +42,8 @@ class AuthPage extends StatelessWidget {
                     const SizedBox(height: 40),
                     _buildHeader(context, state),
                     const SizedBox(height: 40),
-                    if (state is AuthIdle)
-                      _buildCupertinoSegment(context, state),
+                    if (context.read<AuthCubit>().state is! AuthLoading)
+                      _buildCupertinoSegment(context),
                     const SizedBox(height: 32),
                     _buildContent(context, state),
                   ],
@@ -82,12 +82,12 @@ class AuthPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCupertinoSegment(BuildContext context, AuthIdle state) {
+  Widget _buildCupertinoSegment(BuildContext context) {
     final theme = Theme.of(context);
     return ClipRRect(
       borderRadius: BorderRadius.circular(150.0),
       child: CupertinoSegmentedControl<bool>(
-        groupValue: state.isRegisterMode,
+        groupValue: context.read<AuthCubit>().isRegisterMode,
         selectedColor: AppColors.primary,
         unselectedColor: CupertinoColors.systemGrey,
         borderColor: CupertinoColors.systemGrey,
@@ -137,12 +137,11 @@ class AuthPage extends StatelessWidget {
           ),
         ],
       );
-    } else if (state is AuthIdle) {
-      return state.isRegisterMode ? const RegisterForm() : const LoginForm();
+    } else {
+      return context.read<AuthCubit>().isRegisterMode
+          ? const RegisterForm()
+          : const LoginForm();
     }
-
-    // Default empty container for other states
-    return Container();
   }
 
   void _showVerificationSheet(

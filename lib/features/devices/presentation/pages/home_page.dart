@@ -1,9 +1,14 @@
+import 'dart:developer';
+
 import 'package:example/core/widgets/custom_refresh_indicator/liquid_pull_to_refresh.dart';
 import 'package:example/features/devices/presentation/cubit/devices_cubit.dart';
+import 'package:example/features/devices/presentation/widgets/add_home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tuya_flutter_ha_sdk/models/thing_smart_home_model.dart';
+
+import '../widgets/site_map_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -60,7 +65,10 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Show add home dialog/sheet
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddHomePage()),
+          );
         },
         child: Icon(Icons.add),
       ),

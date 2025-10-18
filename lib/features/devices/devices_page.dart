@@ -76,9 +76,7 @@ class _DevicesPageState extends State<DevicesPage> {
               );
             }
             // س
-            return Expanded(
-              child: Center(child: Text('No devices yet. Tap + to add one.')),
-            );
+            return Center(child: Text('No devices yet. Tap + to add one.'));
           },
         ),
       ),

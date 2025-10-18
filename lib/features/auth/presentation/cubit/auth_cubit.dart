@@ -19,13 +19,14 @@ class AuthCubit extends Cubit<AuthState> {
   static const _resendCooldownSeconds = 30;
 
   AuthCubit() : super(const AuthIdle(isRegisterMode: false));
-
+  bool isRegisterMode = false;
   TuyaUserModel? user;
   ThingSmartUserModel? thingSmartUserModel;
   void toggleMode() {
     if (state is AuthIdle) {
       final currentState = state as AuthIdle;
-      emit(AuthIdle(isRegisterMode: !currentState.isRegisterMode));
+      isRegisterMode = !currentState.isRegisterMode;
+      emit(AuthIdle(isRegisterMode: isRegisterMode));
     }
   }
 
@@ -39,9 +40,11 @@ class AuthCubit extends Cubit<AuthState> {
         thingSmartUserModel = ThingSmartUserModel.fromJson(resultInfo);
         emit(AuthAuthenticated());
       } else {
+        isRegisterMode = false;
         emit(const AuthIdle(isRegisterMode: false));
       }
     } else {
+      isRegisterMode = false;
       emit(const AuthIdle(isRegisterMode: false));
     }
   }
@@ -63,25 +66,29 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> login(String email, String password) async {
     emit(const AuthLoading(message: 'Logging in...'));
-    final result = await TuyaFlutterHaSdkPlatform.instance.loginWithEmail(
-      countryCode: '+1',
-      email: email,
-      password: password,
-      createHome: false,
-    );
-    if (result.containsKey('uid')) {
-      user = TuyaUserModel.fromMap(result);
-      final resultInfo = await TuyaFlutterHaSdkPlatform.instance
-          .getCurrentUser();
-      if (resultInfo.isNotEmpty) {
-        thingSmartUserModel = ThingSmartUserModel.fromJson(resultInfo);
-        await saveUserData();
-        emit(AuthAuthenticated());
+    try {
+      final result = await TuyaFlutterHaSdkPlatform.instance.loginWithEmail(
+        countryCode: '+1',
+        email: email,
+        password: password,
+        createHome: false,
+      );
+      if (result.containsKey('uid')) {
+        user = TuyaUserModel.fromMap(result);
+        final resultInfo = await TuyaFlutterHaSdkPlatform.instance
+            .getCurrentUser();
+        if (resultInfo.isNotEmpty) {
+          thingSmartUserModel = ThingSmartUserModel.fromJson(resultInfo);
+          await saveUserData();
+          emit(AuthAuthenticated());
+        } else {
+          emit(AuthError(message: "Failed to fetch user info"));
+        }
       } else {
-        emit(AuthError(message: "Failed to fetch user info"));
+        emit(AuthError(message: result['message'] ?? "Unknown error"));
       }
-    } else {
-      emit(AuthError(message: result['message'] ?? "Unknown error"));
+    } catch (e) {
+      emit(AuthError(message: e.toString()));
     }
   }
 
@@ -214,6 +221,7 @@ class AuthCubit extends Cubit<AuthState> {
   void cancelVerification() {
     _verificationTimer?.cancel();
     _resendTimer?.cancel();
+    isRegisterMode = true;
     emit(const AuthIdle(isRegisterMode: true));
   }
 

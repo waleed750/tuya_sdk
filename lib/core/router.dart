@@ -18,19 +18,19 @@ class AppRouter {
     initialLocation: '/auth',
     debugLogDiagnostics: true,
     redirect: (context, state) {
-      final isAuthPage = state.fullPath == '/auth';
-      final authCubit = context.read<AuthCubit>();
-      final isAuthenticated = authCubit.state is AuthAuthenticated;
+      // final isAuthPage = state.fullPath == '/auth';
+      // final authCubit = context.read<AuthCubit>();
+      // final isAuthenticated = authCubit.state is AuthAuthenticated;
 
-      // If authenticated and on auth page, go to home
-      if (isAuthenticated && isAuthPage) {
-        return '/home';
-      }
+      // // If authenticated and on auth page, go to home
+      // if (isAuthenticated && isAuthPage) {
+      //   return '/home';
+      // }
 
-      // If not authenticated and not on auth page, go to auth
-      if (!isAuthenticated && !isAuthPage) {
-        return '/auth';
-      }
+      // // If not authenticated and not on auth page, go to auth
+      // if (!isAuthenticated && !isAuthPage) {
+      //   return '/auth';
+      // }
 
       // No redirection needed
       return null;
