@@ -23,6 +23,64 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
 
   DiscoveredDevice? device; // last found (Wi-Fi)
   DiscoveredDevice? bleDevice; // last found (BLE)
+  StreamSubscription<Map<String, dynamic>>? _pairingSub;
+
+  void _ensurePairingEventsSubscribed() {
+    _pairingSub ??= TuyaFlutterHaSdk.pairingEvents.listen(
+      (ev) {
+        final type = ev['type'] as String? ?? '';
+
+        switch (type) {
+          // Wi-Fi activator
+          case 'wifi.onStep':
+            final step = (ev['step'] ?? '') as String;
+            // Optional: reflect steps to UI (e.g., smart_config, device_found, active, etc.)
+            // emit a progress state or log
+            break;
+
+          case 'wifi.onError':
+            final msg = (ev['errorMessage'] ?? 'Activation error') as String;
+            emit(OnboardingError(msg));
+            break;
+
+          case 'wifi.onActiveSuccess':
+            final found = _mapSingle(ev, fallbackType: 'wifi');
+            if (found != null) {
+              device = found;
+              emit(OnboardingDevicesFound([found], protocol: 'wifi'));
+              emit(OnboardingPairedSuccess(found));
+            }
+            break;
+
+          // BLE discovery helper (if you want realtime instead of polling)
+          case 'ble.onScanResult':
+            final found = _mapSingle(ev, fallbackType: 'ble');
+            if (found != null) {
+              bleDevice = found;
+              emit(OnboardingDevicesFound([found], protocol: 'ble'));
+            }
+            break;
+
+          // Device lifecycle (after pairing)
+          case 'device.onStatusChanged':
+            final online = ev['online'] == true;
+            // emit some device status state, if you keep it in Cubit
+            break;
+
+          case 'device.onDpUpdate':
+            // parse ev['dps'] json string if you need, then update UI/state
+            break;
+
+          case 'device.onRemoved':
+            // handle removal
+            break;
+        }
+      },
+      onError: (e) {
+        emit(OnboardingError('Pairing stream error: $e'));
+      },
+    );
+  }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Wi-Fi (EZ / AP)
@@ -47,39 +105,24 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
         return;
       }
 
-      await TuyaFlutterHaSdk.startConfigWiFi(
+      final raw = await TuyaFlutterHaSdk.startConfigWiFi(
         mode: mode,
         ssid: ssid,
         password: wifiPassword,
         token: token,
+        timeout: timeoutSeconds,
       );
 
-      if (mode == "AP") {
-        // Optional helper; don't block flow
-        unawaited(
-          TuyaFlutterHaSdk.connectDeviceAndQueryWifiList().catchError(
-            (e, _) => log('connectDeviceAndQueryWifiList error: $e'),
-          ),
-        );
+      final found = _mapSingle(raw, fallbackType: 'wifi');
+      if (found != null) {
+        device = found;
+        emit(OnboardingDevicesFound([device!], protocol: 'wifi'));
+        emit(OnboardingPairedSuccess(device!)); // activator = paired
+      } else {
+        emit(const OnboardingError('Activator returned no device details'));
       }
 
-      // Poll every 2s: your native method may return a device (Map) or null.
-      _pollTimer?.cancel();
-      _pollTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
-        if (!isScanning) return;
-        try {
-          final raw = await TuyaFlutterHaSdk.discoverDeviceInfo();
-          final found = _mapSingle(raw, fallbackType: 'wifi');
-          if (found != null) {
-            device = found;
-            emit(OnboardingDevicesFound([device!], protocol: 'wifi'));
-            // Unlike BLE, we keep polling until user taps “Pair” or timeout,
-            // because Wi-Fi activator is still running and more steps may occur.
-          }
-        } catch (e) {
-          log('discoverDeviceInfo (wifi) error: $e');
-        }
-      });
+      await _stopAll();
     } catch (e) {
       emit(OnboardingError(e.toString()));
       await _stopAll();

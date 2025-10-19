@@ -167,7 +167,7 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
   Future<String?> getToken({required int homeId});
 
   /// Starts EZ or AP Wi-Fi pairing.
-  Future<void> startConfigWiFi({
+  Future<Map<String, dynamic>?> startConfigWiFi({
     required String mode,
     required String ssid,
     required String password,

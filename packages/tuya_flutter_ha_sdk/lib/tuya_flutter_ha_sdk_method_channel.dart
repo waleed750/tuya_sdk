@@ -335,20 +335,23 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   /// [mode],[ssid],[password],[token],[timeout] details are passed on to native
   /// startConfigWifi function of native is invoked
   @override
-  Future<void> startConfigWiFi({
+  Future<Map<String, dynamic>?> startConfigWiFi({
     required String mode,
     required String ssid,
     required String password,
     required String token,
     required int timeout,
   }) async {
-    await methodChannel.invokeMethod<void>('startConfigWiFi', <String, dynamic>{
-      'mode': mode,
-      'ssid': ssid,
-      'password': password,
-      'token': token,
-      'timeout': timeout,
-    });
+    return await methodChannel.invokeMethod<Map<String, dynamic>>(
+      'startConfigWiFi',
+      <String, dynamic>{
+        'mode': mode,
+        'ssid': ssid,
+        'password': password,
+        'token': token,
+        'timeout': timeout,
+      },
+    );
   }
 
   /// Stops any ongoing Wi-Fi pairing.

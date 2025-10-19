@@ -107,12 +107,23 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
      * <p>
      * starts with a clean slate.
      */
-
+    private void emitEvent(String type, Map<String, Object> data) {
+        if (eventSink == null) return;
+        Map<String, Object> ev = new HashMap<>();
+        ev.put("type", type);
+        if (data != null) ev.putAll(data);
+        eventSink.success(ev);
+    }
     private void stopAnyPairingOrScan() {
 
         // stop any BLE scan
 
         ThingHomeSdk.getBleOperator().stopLeScan();
+
+        if (mThingActivator != null) {
+            mThingActivator.stop();
+            mThingActivator = null;
+        }
 
 
         // stop BLE-only activator
@@ -187,6 +198,7 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
         channel.setMethodCallHandler(null);
     }
+
 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
@@ -700,39 +712,48 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                         .setTimeOut(configTimeOut.intValue())
                         .setToken(configToken)
                         .setListener(new IThingSmartActivatorListener() {
+                            @Override
+                            public void onError(String errorCode, String errorMsg) {
+                                Map<String, Object> data = new HashMap<>();
+                                data.put("errorCode", errorCode);
+                                data.put("errorMessage", errorMsg);
+                                emitEvent("wifi.onError", data);                 // <— add
+                                result.error("CONFIG_ERROR", errorMsg, "");
+                            }
 
-                                         @Override
-                                         public void onError(String errorCode, String errorMsg) {
-                                             result.error("CONFIG_ERROR", errorMsg, "");
-                                         }
+                            @Override
+                            public void onActiveSuccess(DeviceBean devResp) {
+                                HashMap<String, Object> deviceDetails = new HashMap<>();
+                                deviceDetails.put("devId", devResp.getDevId());
+                                deviceDetails.put("name", devResp.getName());
+                                deviceDetails.put("productId", devResp.getProductId());
+                                deviceDetails.put("uuid", devResp.getUuid());
+                                deviceDetails.put("iconUrl", devResp.getIconUrl());
+                                deviceDetails.put("isOnline", devResp.getIsOnline());
+                                deviceDetails.put("isCloudOnline", devResp.isCloudOnline());
+                                deviceDetails.put("homeId", "not available");
+                                deviceDetails.put("roomId", "not available");
 
-                                         @Override
-                                         public void onActiveSuccess(DeviceBean devResp) {
-                                             HashMap<String, Object> deviceDetails = new HashMap<>();
-                                             deviceDetails.put("devId", devResp.getDevId());
-                                             deviceDetails.put("name", devResp.getName());
-                                             deviceDetails.put("productId", devResp.getProductId());
-                                             deviceDetails.put("uuid", devResp.getUuid());
-                                             deviceDetails.put("iconUrl", devResp.getIconUrl());
-                                             deviceDetails.put("isOnline", devResp.getIsOnline());
-                                             deviceDetails.put("isCloudOnline", devResp.isCloudOnline());
-                                             deviceDetails.put("homeId", "not available");
-                                             deviceDetails.put("roomId", "not available");
-                                             result.success(deviceDetails);
-                                             Log.i("Device_Details", deviceDetails.toString());
-                                         }
+                                emitEvent("wifi.onActiveSuccess", new HashMap<>(deviceDetails)); // <— add
+                                result.success(deviceDetails);
+                                Log.i("Device_Details", deviceDetails.toString());
+                            }
 
-                                         @Override
-                                         public void onStep(String step, Object data) {
-                                             Log.i("ON_STEP", step + ":" + data);
-                                         }
-                                     }
-                        );
+                            @Override
+                            public void onStep(String step, Object dataObj) {
+                                Map<String, Object> data = new HashMap<>();
+                                data.put("step", step);
+                                if (dataObj != null) data.put("data", String.valueOf(dataObj));
+                                emitEvent("wifi.onStep", data);                  // <— add
+                                Log.i("ON_STEP", step + ":" + dataObj);
+                            }
+                         }); 
                 mThingActivator = ThingHomeSdk.getActivatorInstance().newActivator(builder);
                 mThingActivator.start();
                 break;
             case "stopConfigWiFi":
                 // calls the Activator stop function of Tuya SDK
+                
                 if (mThingActivator != null) {
                     mThingActivator.stop();
                     result.success(null);

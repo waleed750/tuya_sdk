@@ -702,7 +702,7 @@ class TuyaFlutterHaSdk {
   /// - 'token': token of the home
   ///
   /// Throws [PlatformException] on failure.
-  static Future<void> startConfigWiFi({
+  static Future<Map<String, dynamic>?> startConfigWiFi({
     required String mode,
     required String ssid,
     required String password,

@@ -70,7 +70,7 @@ class _WifiOnboardingPageState extends State<WifiOnboardingPage> {
 
             // Mode picker
             DropdownButtonFormField<String>(
-              value: _mode,
+              initialValue: _mode,
               items: const [
                 DropdownMenuItem(value: 'EZ', child: Text('EZ (SmartConfig)')),
                 DropdownMenuItem(
@@ -135,10 +135,7 @@ class _WifiOnboardingPageState extends State<WifiOnboardingPage> {
                                 if (!ok) return;
 
                                 // Inputs
-                                final ssid =
-                                    _wifiSSIDController.text.trim().isEmpty
-                                    ? (devicesCubit.currentSSID ?? '')
-                                    : _wifiSSIDController.text.trim();
+                                final ssid = _wifiSSIDController.text.trim();
                                 final pwd = _wifiPasswordController.text;
 
                                 if (devicesCubit.currentHomeId == null) {
