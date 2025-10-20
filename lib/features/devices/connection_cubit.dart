@@ -97,7 +97,7 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
       isScanning = true;
 
       _startCountdown(timeoutSeconds, 'wifi');
-
+      _ensurePairingEventsSubscribed(); // <— add
       final token = await TuyaFlutterHaSdk.getToken(homeId: homeId);
       if (token == null || token.isEmpty) {
         emit(OnboardingError("Failed to get token for homeId: $homeId"));
@@ -146,6 +146,7 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
       bleDevice = null;
 
       _startCountdown(timeoutSeconds, 'ble');
+      _ensurePairingEventsSubscribed(); // <— add
 
       // Poll every 2s. Each call starts a short scan under the hood and returns
       // the FIRST inactivated Tuya BLE device if found, then ends the native scan.
@@ -308,7 +309,10 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
   }
 
   @override
+  @override
   Future<void> close() {
+    _pairingSub?.cancel();
+    _pairingSub = null;
     _wifiSub?.cancel();
     _bleSub?.cancel();
     _pollTimer?.cancel();
