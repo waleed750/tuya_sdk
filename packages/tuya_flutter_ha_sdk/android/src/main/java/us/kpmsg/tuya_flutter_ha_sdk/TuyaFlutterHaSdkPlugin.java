@@ -656,9 +656,10 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                         deviceDetails.put("bleType", bean.getDeviceType());
                         deviceDetails.put("deviceType", bean.getDeviceType());
                         deviceDetails.put("configType", bean.getConfigType());
+                
+                        emitEvent("ble.onScanResult", new HashMap<>(deviceDetails));      // <— add
                         result.success(deviceDetails);
                         ThingHomeSdk.getBleOperator().stopLeScan();
-
                     }
                 });
                 break;
@@ -914,27 +915,40 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                 mDevice.registerDevListener(new IDevListener() {
                     @Override
                     public void onDpUpdate(String devId, String dpStr) {
-                        eventSink.success("onDpUpdate:" + dpStr);
+                        Map<String, Object> data = new HashMap<>();
+                        data.put("devId", devId);
+                        data.put("dps", dpStr);
+                        emitEvent("device.onDpUpdate", data);           // <— add
                     }
-
+                
                     @Override
                     public void onRemoved(String devId) {
-                        eventSink.success("onRemoved");
+                        Map<String, Object> data = new HashMap<>();
+                        data.put("devId", devId);
+                        emitEvent("device.onRemoved", data);            // <— add
                     }
-
+                
                     @Override
                     public void onStatusChanged(String devId, boolean online) {
-                        eventSink.success("onStatusChanged:" + String.valueOf(online));
+                        Map<String, Object> data = new HashMap<>();
+                        data.put("devId", devId);
+                        data.put("online", online);
+                        emitEvent("device.onStatusChanged", data);      // <— add
                     }
-
+                
                     @Override
                     public void onNetworkStatusChanged(String devId, boolean status) {
-                        eventSink.success("onNetworkStatusChanged:" + String.valueOf(status));
+                        Map<String, Object> data = new HashMap<>();
+                        data.put("devId", devId);
+                        data.put("status", status);
+                        emitEvent("device.onNetworkStatusChanged", data); // <— add
                     }
-
+                
                     @Override
                     public void onDevInfoUpdate(String devId) {
-                        eventSink.success("onDevInfoUpdate");
+                        Map<String, Object> data = new HashMap<>();
+                        data.put("devId", devId);
+                        emitEvent("device.onDevInfoUpdate", data);      // <— add
                     }
                 });
 
