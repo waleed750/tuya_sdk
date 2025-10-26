@@ -1300,6 +1300,7 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                         result.error("WIFI_UNLOCK_FAILED", message, "");
                     }
 
+
                     @Override
                     public void onSuccess(Boolean result1) {
                         Log.i("WIFI Lock", "reply remote unlock success");

@@ -12,6 +12,47 @@ import 'package:tuya_flutter_ha_sdk/tuya_flutter_ha_sdk.dart';
 part 'devices_state.dart';
 
 class DevicesCubit extends Cubit<DevicesState> {
+  /// Lock the smart lock device (if not already locked)
+  Future<void> lockDevice(Map<String, dynamic> deviceMap) async {
+    final devId = deviceMap['devId'] ?? deviceMap['id'];
+    final dps = deviceMap['dps'] as Map?;
+    final isLocked = dps != null && (dps['1'] == 0); // 0 = locked, 1 = unlocked
+    if (isLocked) {
+      emit(DevicesError(message: 'Device is already locked.'));
+      return;
+    }
+    try {
+      await TuyaFlutterHaSdk.controlMatter(
+        devId: devId,
+        dps: {'1': 0}, // 0 = lock
+      );
+      emit(DevicesLoaded());
+    } catch (e) {
+      emit(DevicesError(message: 'Failed to lock: $e'));
+    }
+  }
+
+  /// Unlock the smart lock device (if not already unlocked)
+  Future<void> unlockDevice(Map<String, dynamic> deviceMap) async {
+    final devId = deviceMap['devId'] ?? deviceMap['id'];
+    final dps = deviceMap['dps'] as Map?;
+    final isUnlocked =
+        dps != null && (dps['1'] == 1); // 1 = unlocked, 0 = locked
+    if (isUnlocked) {
+      emit(DevicesError(message: 'Device is already unlocked.'));
+      return;
+    }
+    try {
+      await TuyaFlutterHaSdk.controlMatter(
+        devId: devId,
+        dps: {'1': 1}, // 1 = unlock
+      );
+      emit(DevicesLoaded());
+    } catch (e) {
+      emit(DevicesError(message: 'Failed to unlock: $e'));
+    }
+  }
+
   DevicesCubit() : super(DevicesInitial());
 
   int? currentHomeId;
@@ -19,8 +60,6 @@ class DevicesCubit extends Cubit<DevicesState> {
   ThingSmartUserModel? currentDevice;
   String? currentSSID;
   List<Map<String, dynamic>> devices = [];
-  Timer? _scanTimer;
-  Timer? _pollTimer;
   bool _isScanning = false;
 
   bool get isScanning => _isScanning;
