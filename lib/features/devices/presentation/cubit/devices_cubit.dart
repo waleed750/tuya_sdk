@@ -18,7 +18,7 @@ class DevicesCubit extends Cubit<DevicesState> {
   List<ThingSmartHomeModel>? currentHomes;
   ThingSmartUserModel? currentDevice;
   String? currentSSID;
-
+  List<Map<String, dynamic>> devices = [];
   Timer? _scanTimer;
   Timer? _pollTimer;
   bool _isScanning = false;
@@ -84,10 +84,9 @@ class DevicesCubit extends Cubit<DevicesState> {
   }
 
   Future<void> loadDevices() async {
+    devices.clear();
     emit(DevicesLoading());
-    final devices = await TuyaFlutterHaSdk.getHomeDevices(
-      homeId: currentHomeId ?? 0,
-    );
+    devices = await TuyaFlutterHaSdk.getHomeDevices(homeId: currentHomeId ?? 0);
     if (devices.isEmpty) {
       emit(DevicesError(message: 'No devices found'));
       return;

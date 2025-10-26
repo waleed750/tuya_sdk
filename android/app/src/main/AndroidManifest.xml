@@ -11,7 +11,7 @@
 <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
     <application android:label="Tuya SDK Test" android:name=".MainApplication" android:icon="@mipmap/ic_launcher" tools:replace="android:label">
 
-                <meta-data android:name="THING_SMART_APPKEY" android:value="msf947w8qfpcwmhwcnwr"/>
+    <meta-data android:name="THING_SMART_APPKEY" android:value="msf947w8qfpcwmhwcnwr"/>
     <meta-data android:name="THING_SMART_SECRET" android:value="9m38apxreufd38hmnn9c79rf73nj3tcm"/>
     <meta-data android:name="THING_SMART_REGION" android:value="EU"/>
         

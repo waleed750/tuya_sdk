@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -47,7 +49,7 @@ class _DevicesPageState extends State<DevicesPage> {
               // final devices = state is DevicesRefreshing
               //     ? state.devices
               //     : (state as DevicesLoaded).devices;
-              final devices = [];
+              final devices = context.read<DevicesCubit>().devices;
 
               return RefreshIndicator(
                 onRefresh: () async {
@@ -59,13 +61,15 @@ class _DevicesPageState extends State<DevicesPage> {
                   itemCount: devices.length,
                   itemBuilder: (context, index) {
                     final device = devices[index];
+                    log('Device: $device');
                     return ListTile(
-                      title: Text(device.name),
+                      title: Text(device["name"]),
+
                       onTap: () {
                         // Device detail navigation would go here
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Selected ${device.name}'),
+                            content: Text('Selected ${device["name"]}'),
                             duration: const Duration(seconds: 1),
                           ),
                         );
