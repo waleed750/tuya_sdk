@@ -167,8 +167,8 @@ class _RegisterFormState extends State<RegisterForm> {
 
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) return 'Please enter an email';
-    final regex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}\$');
-    if (!regex.hasMatch(value)) return 'Please enter a valid email address';
+    // final regex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}\$');
+    // if (!regex.hasMatch(value)) return 'Please enter a valid email address';
     return null;
   }
 

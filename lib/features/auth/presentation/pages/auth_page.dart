@@ -114,9 +114,9 @@ class AuthPage extends StatelessWidget {
         onValueChanged: (isRegister) {
           final cubit = context.read<AuthCubit>();
           final current = cubit.state;
-          if (current is AuthIdle && current.isRegisterMode != isRegister) {
-            cubit.toggleMode();
-          }
+          // if (current is AuthIdle && current.isRegisterMode != isRegister) {
+          cubit.toggleMode();
+          // }
         },
       ),
     );

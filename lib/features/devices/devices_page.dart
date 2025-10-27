@@ -8,7 +8,7 @@ import 'add_device_bottom_sheet.dart';
 import 'presentation/cubit/devices_cubit.dart';
 
 class DevicesPage extends StatefulWidget {
-  const DevicesPage({Key? key}) : super(key: key);
+  const DevicesPage({super.key});
 
   @override
   State<DevicesPage> createState() => _DevicesPageState();
@@ -62,19 +62,113 @@ class _DevicesPageState extends State<DevicesPage> {
                   itemBuilder: (context, index) {
                     final device = devices[index];
                     log('Device: $device');
-                    return ListTile(
-                      title: Text(device["name"]),
+                    // Determine if this device is a smart lock (by type or dps)
+                    final isLock =
+                        (device["category"] == "lock") ||
+                        (device["dps"] != null &&
+                            (device["dps"]['1'] == 0 ||
+                                device["dps"]['1'] == 1));
+                    final isLocked =
+                        device["dps"] != null && device["dps"]['1'] == 0;
+                    final isUnlocked =
+                        device["dps"] != null && device["dps"]['1'] == 1;
 
-                      onTap: () {
-                        // Device detail navigation would go here
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Selected ${device["name"]}'),
-                            duration: const Duration(seconds: 1),
-                          ),
-                        );
-                      },
+                    Widget listTile = ListTile(
+                      title: Row(
+                        children: [
+                          Text(device["name"] ?? "Unnamed Device"),
+                          if (isLock)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: Icon(
+                                isLocked ? Icons.lock : Icons.lock_open,
+                                color: isLocked ? Colors.red : Colors.green,
+                                size: 20,
+                              ),
+                            ),
+                        ],
+                      ),
+                      trailing: isLock
+                          ? Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.lock,
+                                    color: isLocked ? Colors.red : Colors.grey,
+                                  ),
+
+                                  tooltip: isLocked ? 'Lock' : 'Unlock',
+                                  onPressed: isLocked
+                                      ? () => context
+                                            .read<DevicesCubit>()
+                                            .unlockDevice(device)
+                                      : () => context
+                                            .read<DevicesCubit>()
+                                            .lockDevice(device),
+                                ),
+                              ],
+                            )
+                          : null,
+                      // onTap: () {
+                      //   ScaffoldMessenger.of(context).showSnackBar(
+                      //     SnackBar(
+                      //       content: Text('Selected ${device["name"]}'),
+                      //       duration: const Duration(seconds: 1),
+                      //     ),
+                      //   );
+                      // },
                     );
+
+                    if (isLock) {
+                      // Only allow swipe-to-delete for lock devices
+                      return Dismissible(
+                        key: ValueKey(device["devId"] ?? device["id"] ?? index),
+                        direction: DismissDirection.endToStart,
+                        background: Container(
+                          color: Colors.red,
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Icon(Icons.delete, color: Colors.white),
+                        ),
+                        confirmDismiss: (direction) async {
+                          return await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  title: Text('Delete Smart Lock'),
+                                  content: Text(
+                                    'Are you sure you want to delete this smart lock?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(ctx).pop(false),
+                                      child: Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(ctx).pop(true),
+                                      child: Text(
+                                        'Delete',
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ) ??
+                              false;
+                        },
+                        onDismissed: (direction) {
+                          // TODO: Call cubit/device delete method here
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Smart lock deleted')),
+                          );
+                        },
+                        child: listTile,
+                      );
+                    } else {
+                      return listTile;
+                    }
                   },
                 ),
               );

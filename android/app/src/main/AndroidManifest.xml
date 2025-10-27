@@ -9,15 +9,15 @@
 <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
 <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
 <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
-    <application android:label="Tuya SDK Test" android:name=".MainApplication" android:icon="@mipmap/ic_launcher" tools:replace="android:label">
-
+<application android:label="Tuya SDK Test" android:name=".MainApplication" android:icon="@mipmap/ic_launcher" tools:replace="android:label">
+    <!-- Tuya SDK Configuration -->
     <meta-data android:name="THING_SMART_APPKEY" android:value="xxhuextxgd95f34vr5f3"/>
     <meta-data android:name="THING_SMART_SECRET" android:value="c4hsgck5g3mvt4ck3dheeq8esd7gxu78"/>
     <meta-data android:name="THING_SMART_REGION" android:value="EU"/>
-        
-        <!-- App Schema Configuration -->
-        <meta-data android:name="THING_SMART_APP_SCHEMA" android:value="isyncloudssyncn"/>
-        <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTop" android:taskAffinity="" android:theme="@style/LaunchTheme" android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode" android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize">
+    <meta-data android:name="THING_SMART_APP_SCHEMA" android:value="syncnexample"/>
+    <!-- App Schema Configuration -->
+
+    <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTop" android:taskAffinity="" android:theme="@style/LaunchTheme" android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode" android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize">
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues

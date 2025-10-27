@@ -1,10 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../features/auth/presentation/cubit/auth_cubit.dart';
 import '../features/auth/presentation/pages/auth_page.dart';
 import '../features/devices/devices_page.dart';
 import '../features/devices/presentation/pages/home_page.dart';

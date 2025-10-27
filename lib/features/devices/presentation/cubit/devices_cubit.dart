@@ -26,6 +26,7 @@ class DevicesCubit extends Cubit<DevicesState> {
         devId: devId,
         dps: {'1': 0}, // 0 = lock
       );
+
       emit(DevicesLoaded());
     } catch (e) {
       emit(DevicesError(message: 'Failed to lock: $e'));

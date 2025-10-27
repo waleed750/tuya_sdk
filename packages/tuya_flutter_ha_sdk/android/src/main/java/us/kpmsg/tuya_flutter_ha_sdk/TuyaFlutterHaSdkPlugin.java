@@ -351,6 +351,10 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                 String verificationAccount = call.argument("account");
                 String verificationAccountType = call.argument("accountType");
                 Integer verificationTypeArg = call.argument("type");
+                Log.i("TuyaSendVerification", "countryCode: " + verificationCountryCode);
+                Log.i("TuyaSendVerification", "account: " + verificationAccount);
+                Log.i("TuyaSendVerification", "accountType: " + verificationAccountType);
+                Log.i("TuyaSendVerification", "type: " + verificationTypeArg);
 
                 if (verificationCountryCode == null || verificationAccount == null || verificationAccountType == null) {
                     result.error("MISSING_ARGS", "countryCode, account, accountType required", null);

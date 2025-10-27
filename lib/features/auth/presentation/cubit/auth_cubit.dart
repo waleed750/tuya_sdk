@@ -23,11 +23,11 @@ class AuthCubit extends Cubit<AuthState> {
   TuyaUserModel? user;
   ThingSmartUserModel? thingSmartUserModel;
   void toggleMode() {
-    if (state is AuthIdle) {
-      final currentState = state as AuthIdle;
-      isRegisterMode = !currentState.isRegisterMode;
-      emit(AuthIdle(isRegisterMode: isRegisterMode));
-    }
+    // if (state is AuthIdle) {
+    // final currentState = state as AuthIdle;
+    isRegisterMode = !isRegisterMode;
+    emit(AuthIdle(isRegisterMode: isRegisterMode));
+    // }
   }
 
   Future<void> automateLogin() async {
@@ -94,37 +94,41 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> sendVerifcationCode(String email) async {
     // emit(const AuthLoading(message: 'Sending verification code...'));
-    emit(VerificationSendCodeLoading());
-    //The purpose of the verification code. Valid values:
-    // 1: register an account with an email address
-    // 2: login to the app with an email address
-    // 3: reset the password of an account that is registered with an email address
-    await TuyaFlutterHaSdkPlatform.instance.sendVerificationCode(
-      countryCode: '1',
-      account: email,
-      accountType: 'email',
-    );
-    _verificationStartTime = DateTime.now();
+    try {
+      emit(VerificationSendCodeLoading());
+      //The purpose of the verification code. Valid values:
+      // 1: register an account with an email address
+      // 2: login to the app with an email address
+      // 3: reset the password of an account that is registered with an email address
+      await TuyaFlutterHaSdkPlatform.instance.sendVerificationCode(
+        countryCode: '1',
+        account: email,
+        accountType: 'email',
+      );
+      _verificationStartTime = DateTime.now();
 
-    // Start periodic verification checks
-    _verificationTimer?.cancel();
-    // _verificationTimer = Timer.periodic(
-    //   const Duration(seconds: _verificationPollIntervalSeconds),
-    //   (_) => _checkVerification(email),
-    // );
+      // Start periodic verification checks
+      _verificationTimer?.cancel();
+      // _verificationTimer = Timer.periodic(
+      //   const Duration(seconds: _verificationPollIntervalSeconds),
+      //   (_) => _checkVerification(email),
+      // );
 
-    // Start resend cooldown
-    _startResendCooldown();
+      // Start resend cooldown
+      // _startResendCooldown();
 
-    // Emit state indicating we need verification and provide lastChecked
-    emit(
-      AuthNeedsVerification(
-        email: email,
-        password: '',
-        lastChecked: DateTime.now(),
-        resendSecondsLeft: _resendCooldownSeconds,
-      ),
-    );
+      // Emit state indicating we need verification and provide lastChecked
+      emit(
+        AuthNeedsVerification(
+          email: email,
+          password: '',
+          lastChecked: DateTime.now(),
+          resendSecondsLeft: _resendCooldownSeconds,
+        ),
+      );
+    } catch (e) {
+      emit(AuthError(message: e.toString()));
+    }
   }
 
   void _startResendCooldown() {
@@ -203,18 +207,22 @@ class AuthCubit extends Cubit<AuthState> {
     required String code,
   }) async {
     emit(const AuthLoading(message: 'Registering...'));
-    final result = await TuyaFlutterHaSdkPlatform.instance
-        .registerAccountWithEmail(
-          countryCode: '+1',
-          email: email,
-          password: password,
-          code: code,
-        );
-    if (result.containsKey('uid')) {
-      user = TuyaUserModel.fromMap(result);
-      emit(AuthAuthenticated());
-    } else {
-      emit(AuthError(message: result['message'] ?? "Unknown error"));
+    try {
+      final result = await TuyaFlutterHaSdkPlatform.instance
+          .registerAccountWithEmail(
+            countryCode: '+1',
+            email: email,
+            password: password,
+            code: code,
+          );
+      if (result.containsKey('uid')) {
+        user = TuyaUserModel.fromMap(result);
+        emit(AuthAuthenticated());
+      } else {
+        emit(AuthError(message: result['message'] ?? "Unknown error"));
+      }
+    } catch (e) {
+      emit(AuthError(message: e.toString()));
     }
   }
 

@@ -1,4 +1,5 @@
-package com.isynclouds.syncn
+package com.syncn.example
+
 
 import com.facebook.drawee.backends.pipeline.Fresco
 import android.app.Application
@@ -8,6 +9,6 @@ class MainApplication : Application() {
   override fun onCreate() {
     super.onCreate()
     Fresco.initialize(this)
-    ThingHomeSdk.init(this)
+    // ThingHomeSdk.init(this)
   }
 }
