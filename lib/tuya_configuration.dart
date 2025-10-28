@@ -1,7 +1,7 @@
 class TuyaConfig {
-  static const String androidAppKey = 'msf947w8qfpcwmhwcnwr';
-  static const String androidAppSecret = '9m38apxreufd38hmnn9c79rf73nj3tcm';
+  static const String androidAppKey = 'xxhuextxgd95f34vr5f3';
+  static const String androidAppSecret = 'c4hsgck5g3mvt4ck3dheeq8esd7gxu78';
 
-  static const String iosAppKey = 'mpaxrn5yuyp8n53ks5qa';
-  static const String iosAppSecret = 'vruvaqadkucnry3xr4ruwnntkdw5wcgm';
+  static const String iosAppKey = 'qju4x7uvquhy3ymar7ks';
+  static const String iosAppSecret = 'xtxa9ktnfs4wctkvsqcahsknvjdc4trm';
 }

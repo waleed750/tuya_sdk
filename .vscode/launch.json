@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "tuya_sdk",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "tuya_sdk (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "tuya_sdk (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "tuya_flutter_ha_sdk",
+            "cwd": "packages\\tuya_flutter_ha_sdk",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "tuya_flutter_ha_sdk (profile mode)",
+            "cwd": "packages\\tuya_flutter_ha_sdk",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "tuya_flutter_ha_sdk (release mode)",
+            "cwd": "packages\\tuya_flutter_ha_sdk",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}
