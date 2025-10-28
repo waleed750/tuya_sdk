@@ -1312,46 +1312,64 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                     }
                 });
                 break;
-             case "lockWifiLock":
-                // Manual lock for WiFi lock device
-                String lockWifiDevId = call.argument("devId");
-                ThingOptimusSdk.init(activity);
-                IThingLockManager thingLockManagerWifiLockLock = ThingOptimusSdk.getManager(IThingLockManager.class);
-                IThingWifiLock thingLockDeviceWifiLockLock = thingLockManagerWifiLockLock.getWifiLock(lockWifiDevId);
-                thingLockDeviceWifiLockLock.manualLock(new IResultCallback() {
-                    @Override
-                    public void onError(String code, String error) {
-                        Log.e("WIFI Lock", "manualLock onError code:" + code + ", error:" + error);
-                        result.error("WIFI_LOCK_FAILED", error, "");
-                    }
+            //  case "lockWifiLock": {
+            //     final String devId = call.argument("devId");
+            //     final Boolean confirm = call.argument("confirm");
 
-                    @Override
-                    public void onSuccess() {
-                        Log.i("WIFI Lock", "manualLock onSuccess");
-                        result.success(null);
-                    }
-                });
-                break;
-            case "dynamicWifiLockPassword":
-                //getDynamicPassword function of Tuya SDK is called
-                String dynamicPwdDevId = call.argument("devId");
-                ThingOptimusSdk.init(activity);
-                IThingLockManager thingLockManagerWifiLockPwd = ThingOptimusSdk.getManager(IThingLockManager.class);
-                IThingWifiLock thingLockDeviceWifiLockPwd = thingLockManagerWifiLockPwd.getWifiLock(dynamicPwdDevId);
-                thingLockDeviceWifiLockPwd.getDynamicPassword(new IThingResultCallback<String>() {
-                    @Override
-                    public void onError(String code, String message) {
-                        Log.e("WIFI Lock", "get lock dynamic password failed: code = " + code + "  message = " + message);
-                        result.error("WIFI_DYNAMIC_PASSWORD_FAILED", message, "");
-                    }
+            //     if (devId == null || devId.isEmpty() || confirm == null) {
+            //         result.error("MISSING_ARGS", "devId and confirm are required", null);
+            //         break;
+            //     }
 
-                    @Override
-                    public void onSuccess(String dynamicPassword) {
-                        Log.i("Wifi Lock", "get lock dynamic password success: dynamicPassword = " + dynamicPassword);
-                        result.success(dynamicPassword);
-                    }
-                });
-                break;
+            //     // Initialize the SDK and get the lock manager
+            //     ThingOptimusSdk.init(activity);
+            //     IThingLockManager lockManager = ThingOptimusSdk.getManager(IThingLockManager.class);
+            //     IVideoLockManager videoLockManager = lockManager.newVideoLockManagerInstance(devId);
+
+            //     if (videoLockManager == null) {
+            //         result.error("DEVICE_NOT_FOUND", "IVideoLockManager is null", null);
+            //         break;
+            //     }
+
+            //     // Lock the device
+            //     videoLockManager.remoteLock(
+            //         /* isOpen */ false,
+            //         /* confirm */ confirm,
+            //         new IResultCallback() {
+            //             @Override
+            //             public void onError(String code, String error) {
+            //                 Log.e("WIFI Lock", "remoteLock failed: code=" + code + " error=" + error);
+            //                 result.error("WIFI_LOCK_FAILED", error, code);
+            //             }
+
+            //             @Override
+            //             public void onSuccess() {
+            //                 Log.i("WIFI Lock", "remoteLock success");
+            //                 result.success(null);
+            //             }
+            //         }
+            //     );
+            //     break;
+            // case "dynamicWifiLockPassword":
+            //     //getDynamicPassword function of Tuya SDK is called
+            //     String dynamicPwdDevId = call.argument("devId");
+            //     ThingOptimusSdk.init(activity);
+            //     IThingLockManager thingLockManagerWifiLockPwd = ThingOptimusSdk.getManager(IThingLockManager.class);
+            //     IThingWifiLock thingLockDeviceWifiLockPwd = thingLockManagerWifiLockPwd.getWifiLock(dynamicPwdDevId);
+            //     thingLockDeviceWifiLockPwd.getDynamicPassword(new IThingResultCallback<String>() {
+            //         @Override
+            //         public void onError(String code, String message) {
+            //             Log.e("WIFI Lock", "get lock dynamic password failed: code = " + code + "  message = " + message);
+            //             result.error("WIFI_DYNAMIC_PASSWORD_FAILED", message, "");
+            //         }
+
+            //         @Override
+            //         public void onSuccess(String dynamicPassword) {
+            //             Log.i("Wifi Lock", "get lock dynamic password success: dynamicPassword = " + dynamicPassword);
+            //             result.success(dynamicPassword);
+            //         }
+            //     });
+            //     break;
         
             case "checkIfMatter":
                 //isMatter function of Tuya SDK is called

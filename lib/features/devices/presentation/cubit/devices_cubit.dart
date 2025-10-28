@@ -45,35 +45,49 @@ class DevicesCubit extends Cubit<DevicesState> {
 
   /// Unlock the smart lock device (if not already unlocked)
   Future<void> unlockDevice(Map<String, dynamic> deviceMap) async {
+    emit(DeviceStateLoading(deviceId: deviceMap['devId'] ?? deviceMap['id']));
     final devId = deviceMap['devId'] ?? deviceMap['id'];
     final dps = deviceMap['dps'] as Map?;
     final isUnlocked =
         dps != null && (dps['1'] == 1); // 1 = unlocked, 0 = locked
     final ifMatter = await TuyaFlutterHaSdk.checkIsMatter(devId: devId);
     log('isMatter: $ifMatter');
-    if (ifMatter) {}
-    if (isUnlocked) {
-      emit(
-        DeviceErrorChangedState(
-          deviceId: devId,
-          errorMessage: 'Device is already unlocked.',
-        ),
-      );
-      return;
-    }
-    try {
-      await TuyaFlutterHaSdk.controlMatter(
-        devId: devId,
-        dps: {'1': true}, // 1 = unlock
-      );
-      emit(DeviceStateChanged(deviceId: devId));
-    } catch (e) {
-      emit(
-        DeviceErrorChangedState(
-          deviceId: devId,
-          errorMessage: 'Failed to unlock: $e',
-        ),
-      );
+    if (ifMatter) {
+      if (isUnlocked) {
+        emit(
+          DeviceErrorChangedState(
+            deviceId: devId,
+            errorMessage: 'Device is already unlocked.',
+          ),
+        );
+        return;
+      }
+      try {
+        await TuyaFlutterHaSdk.controlMatter(
+          devId: devId,
+          dps: {'1': true}, // 1 = unlock
+        );
+        emit(DeviceStateChanged(deviceId: devId));
+      } catch (e) {
+        emit(
+          DeviceErrorChangedState(
+            deviceId: devId,
+            errorMessage: 'Failed to unlock: $e',
+          ),
+        );
+      }
+    } else {
+      try {
+        await TuyaFlutterHaSdk.replyRequestUnlock(devId: devId, open: true);
+        emit(DeviceStateChanged(deviceId: devId));
+      } catch (e) {
+        emit(
+          DeviceErrorChangedState(
+            deviceId: devId,
+            errorMessage: 'Failed to unlock: $e',
+          ),
+        );
+      }
     }
   }
 

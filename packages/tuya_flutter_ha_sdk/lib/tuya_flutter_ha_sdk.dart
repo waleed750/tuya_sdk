@@ -6,6 +6,8 @@ import 'models/user_model.dart';
 import 'tuya_flutter_ha_sdk_platform_interface.dart';
 
 class TuyaFlutterHaSdk {
+  /// Lock a wifi lock device
+
   /// Returns the platform version, as before.
   Future<String?> getPlatformVersion() {
     return TuyaFlutterHaSdkPlatform.instance.getPlatformVersion();
@@ -1775,6 +1777,10 @@ class TuyaFlutterHaSdk {
       devId: devId,
       open: open,
     );
+  }
+
+  static Future<void> lockWifiLock({required String devId}) {
+    return TuyaFlutterHaSdkPlatform.instance.lockWifiLock(devId: devId);
   }
 
   /// Get a dynamic password for opening a wifi lock

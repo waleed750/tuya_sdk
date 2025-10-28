@@ -10,12 +10,13 @@ class DeviceListTile extends StatelessWidget {
   final VoidCallback? onLock;
   final VoidCallback? onUnlock;
   final VoidCallback onViewMore;
-
+  final bool isloading;
   const DeviceListTile({
     super.key,
     required this.device,
     required this.isLocked,
     required this.isUnlocked,
+    required this.isloading,
     this.onLock,
     this.onUnlock,
     required this.onViewMore,
@@ -103,14 +104,18 @@ class DeviceListTile extends StatelessWidget {
                   //   tooltip: 'Lock',
                   //   onPressed: isLocked ? null : onLock,
                   // ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.lock_open,
-                      color: isUnlocked ? Colors.green : Colors.grey,
+                  if (!isloading) ...[
+                    IconButton(
+                      icon: Icon(
+                        Icons.lock_open,
+                        color: isUnlocked ? Colors.green : Colors.grey,
+                      ),
+                      tooltip: 'Unlock',
+                      onPressed: isUnlocked ? null : onUnlock,
                     ),
-                    tooltip: 'Unlock',
-                    onPressed: isUnlocked ? null : onUnlock,
-                  ),
+                  ] else ...[
+                    CircularProgressIndicator(),
+                  ],
                   IconButton(
                     icon: Icon(Icons.more_horiz),
                     tooltip: 'View More',

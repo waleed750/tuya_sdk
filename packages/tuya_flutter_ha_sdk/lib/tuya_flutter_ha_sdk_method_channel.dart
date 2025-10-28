@@ -709,6 +709,14 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
     });
   }
 
+  /// lockWifiLock function of native is invoked
+  @override
+  Future<void> lockWifiLock({required String devId}) async {
+    await methodChannel.invokeMethod("lockWifiLock", <String, dynamic>{
+      'devId': devId,
+    });
+  }
+
   /// Get a dynamic password for opening a wifi lock
   /// [devId] details is passed on to native
   /// dynamicWifiLockPassword function of native is invoked

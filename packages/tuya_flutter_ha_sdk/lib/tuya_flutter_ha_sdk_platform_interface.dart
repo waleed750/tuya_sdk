@@ -299,6 +299,9 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
   /// Lock a bluetooth lock device
   Future<void> lockBLELock({required String devId});
 
+  /// Lock a wifi lock device
+  Future<void> lockWifiLock({required String devId});
+
   /// Reply to a unlock request on wifi lock
   Future<void> unlockWifiLock({required String devId, required bool open});
 
