@@ -1312,6 +1312,26 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                     }
                 });
                 break;
+             case "lockWifiLock":
+                // Manual lock for WiFi lock device
+                String lockWifiDevId = call.argument("devId");
+                ThingOptimusSdk.init(activity);
+                IThingLockManager thingLockManagerWifiLockLock = ThingOptimusSdk.getManager(IThingLockManager.class);
+                IThingWifiLock thingLockDeviceWifiLockLock = thingLockManagerWifiLockLock.getWifiLock(lockWifiDevId);
+                thingLockDeviceWifiLockLock.manualLock(new IResultCallback() {
+                    @Override
+                    public void onError(String code, String error) {
+                        Log.e("WIFI Lock", "manualLock onError code:" + code + ", error:" + error);
+                        result.error("WIFI_LOCK_FAILED", error, "");
+                    }
+
+                    @Override
+                    public void onSuccess() {
+                        Log.i("WIFI Lock", "manualLock onSuccess");
+                        result.success(null);
+                    }
+                });
+                break;
             case "dynamicWifiLockPassword":
                 //getDynamicPassword function of Tuya SDK is called
                 String dynamicPwdDevId = call.argument("devId");

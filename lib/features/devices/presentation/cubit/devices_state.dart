@@ -4,7 +4,7 @@ abstract class DevicesState extends Equatable {
   const DevicesState();
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [identityHashCode(this)];
 }
 
 final class DevicesInitial extends DevicesState {}
@@ -35,3 +35,22 @@ final class HomeSelected extends DevicesState {}
 final class SSIDLoaded extends DevicesState {}
 
 class HomeAdded extends DevicesState {}
+
+class DeviceStateLoading extends DevicesState {
+  final String deviceId;
+  const DeviceStateLoading({required this.deviceId});
+}
+
+class DeviceStateChanged extends DevicesState {
+  final String deviceId;
+  const DeviceStateChanged({required this.deviceId});
+}
+
+class DeviceErrorChangedState extends DevicesState {
+  final String deviceId;
+  final String errorMessage;
+  const DeviceErrorChangedState({
+    required this.deviceId,
+    required this.errorMessage,
+  });
+}

@@ -2,10 +2,14 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../core/app_colors.dart';
 import 'add_device_bottom_sheet.dart';
 import 'presentation/cubit/devices_cubit.dart';
+import 'widgets/device_list_tile.dart';
+import 'widgets/device_details_sheet.dart';
 
 class DevicesPage extends StatefulWidget {
   const DevicesPage({super.key});
@@ -36,8 +40,12 @@ class _DevicesPageState extends State<DevicesPage> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 3),
         child: BlocBuilder<DevicesCubit, DevicesState>(
+          buildWhen: (previous, current) =>
+              current is! DeviceStateChanged &&
+              current is! DeviceErrorChangedState &&
+              current is! DeviceStateLoading,
           builder: (context, state) {
             if (state is DevicesInitial || state is DevicesLoading) {
               return const Center(
@@ -57,12 +65,14 @@ class _DevicesPageState extends State<DevicesPage> {
                 },
                 color: AppColors.primary,
                 child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 0,
+                  ),
                   itemCount: devices.length,
                   itemBuilder: (context, index) {
                     final device = devices[index];
                     log('Device: $device');
-                    // Determine if this device is a smart lock (by type or dps)
                     final isLock =
                         (device["category"] == "lock") ||
                         (device["dps"] != null &&
@@ -73,101 +83,112 @@ class _DevicesPageState extends State<DevicesPage> {
                     final isUnlocked =
                         device["dps"] != null && device["dps"]['1'] == 1;
 
-                    Widget listTile = ListTile(
-                      title: Row(
-                        children: [
-                          Text(device["name"] ?? "Unnamed Device"),
-                          if (isLock)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8.0),
-                              child: Icon(
-                                isLocked ? Icons.lock : Icons.lock_open,
-                                color: isLocked ? Colors.red : Colors.green,
-                                size: 20,
+                    if (isLock) {
+                      return BlocConsumer<DevicesCubit, DevicesState>(
+                        listener: (context, state) {
+                          if (state is DeviceErrorChangedState &&
+                              state.deviceId ==
+                                  (device["devId"] ?? device["uuid"])) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(state.errorMessage),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        },
+                        listenWhen: (previous, current) =>
+                            current is DeviceStateChanged ||
+                            current is DeviceErrorChangedState ||
+                            current is DeviceStateLoading,
+                        buildWhen: (previous, current) {
+                          return current is DeviceStateChanged ||
+                              current is DeviceErrorChangedState ||
+                              current is DeviceStateLoading;
+                        },
+                        builder: (context, state) {
+                          return Dismissible(
+                            key: ValueKey(
+                              device["devId"] ?? device["id"] ?? index,
+                            ),
+                            direction: DismissDirection.endToStart,
+                            background: Container(
+                              color: Colors.red,
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: Icon(Icons.delete, color: Colors.white),
+                            ),
+                            confirmDismiss: (direction) async {
+                              return await showDialog<bool>(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: Text('Delete Smart Lock'),
+                                      content: Text(
+                                        'Are you sure you want to delete this smart lock?',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(ctx).pop(false),
+                                          child: Text('Cancel'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(ctx).pop(true),
+                                          child: Text(
+                                            'Delete',
+                                            style: TextStyle(color: Colors.red),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ) ??
+                                  false;
+                            },
+                            onDismissed: (direction) {
+                              // TODO: Call cubit/device delete method here
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Smart lock deleted')),
+                              );
+                            },
+                            child: DeviceListTile(
+                              device: device,
+                              isLocked: isLocked,
+                              isUnlocked: isUnlocked,
+                              onLock: () => context
+                                  .read<DevicesCubit>()
+                                  .lockDevice(device),
+                              onUnlock: () => context
+                                  .read<DevicesCubit>()
+                                  .unlockDevice(device),
+                              onViewMore: () => showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (_) =>
+                                    DeviceDetailsSheet(device: device),
                               ),
                             ),
-                        ],
-                      ),
-                      trailing: isLock
-                          ? Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.lock,
-                                    color: isLocked ? Colors.red : Colors.grey,
-                                  ),
-
-                                  tooltip: isLocked ? 'Lock' : 'Unlock',
-                                  onPressed: isLocked
-                                      ? () => context
-                                            .read<DevicesCubit>()
-                                            .unlockDevice(device)
-                                      : () => context
-                                            .read<DevicesCubit>()
-                                            .lockDevice(device),
-                                ),
-                              ],
-                            )
-                          : null,
-                      // onTap: () {
-                      //   ScaffoldMessenger.of(context).showSnackBar(
-                      //     SnackBar(
-                      //       content: Text('Selected ${device["name"]}'),
-                      //       duration: const Duration(seconds: 1),
-                      //     ),
-                      //   );
-                      // },
-                    );
-
-                    if (isLock) {
-                      // Only allow swipe-to-delete for lock devices
-                      return Dismissible(
-                        key: ValueKey(device["devId"] ?? device["id"] ?? index),
-                        direction: DismissDirection.endToStart,
-                        background: Container(
-                          color: Colors.red,
-                          alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Icon(Icons.delete, color: Colors.white),
-                        ),
-                        confirmDismiss: (direction) async {
-                          return await showDialog<bool>(
-                                context: context,
-                                builder: (ctx) => AlertDialog(
-                                  title: Text('Delete Smart Lock'),
-                                  content: Text(
-                                    'Are you sure you want to delete this smart lock?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(ctx).pop(false),
-                                      child: Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(ctx).pop(true),
-                                      child: Text(
-                                        'Delete',
-                                        style: TextStyle(color: Colors.red),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ) ??
-                              false;
-                        },
-                        onDismissed: (direction) {
-                          // TODO: Call cubit/device delete method here
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Smart lock deleted')),
                           );
                         },
-                        child: listTile,
                       );
                     } else {
-                      return listTile;
+                      // Default widget for non-lock devices
+                      return DeviceListTile(
+                        device: device,
+                        isLocked: false,
+                        isUnlocked: false,
+                        onLock: null,
+                        onUnlock: null,
+                        onViewMore: () => showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => DeviceDetailsSheet(device: device),
+                        ),
+                      );
                     }
                   },
                 ),

@@ -18,7 +18,12 @@ class DevicesCubit extends Cubit<DevicesState> {
     final dps = deviceMap['dps'] as Map?;
     final isLocked = dps != null && (dps['1'] == 0); // 0 = locked, 1 = unlocked
     if (isLocked) {
-      emit(DevicesError(message: 'Device is already locked.'));
+      emit(
+        DeviceErrorChangedState(
+          deviceId: devId,
+          errorMessage: 'Device is already locked.',
+        ),
+      );
       return;
     }
     try {
@@ -27,9 +32,14 @@ class DevicesCubit extends Cubit<DevicesState> {
         dps: {'1': 0}, // 0 = lock
       );
 
-      emit(DevicesLoaded());
+      emit(DeviceStateChanged(deviceId: devId));
     } catch (e) {
-      emit(DevicesError(message: 'Failed to lock: $e'));
+      emit(
+        DeviceErrorChangedState(
+          deviceId: devId,
+          errorMessage: 'Failed to lock: $e',
+        ),
+      );
     }
   }
 
@@ -39,18 +49,31 @@ class DevicesCubit extends Cubit<DevicesState> {
     final dps = deviceMap['dps'] as Map?;
     final isUnlocked =
         dps != null && (dps['1'] == 1); // 1 = unlocked, 0 = locked
+    final ifMatter = await TuyaFlutterHaSdk.checkIsMatter(devId: devId);
+    log('isMatter: $ifMatter');
+    if (ifMatter) {}
     if (isUnlocked) {
-      emit(DevicesError(message: 'Device is already unlocked.'));
+      emit(
+        DeviceErrorChangedState(
+          deviceId: devId,
+          errorMessage: 'Device is already unlocked.',
+        ),
+      );
       return;
     }
     try {
       await TuyaFlutterHaSdk.controlMatter(
         devId: devId,
-        dps: {'1': 1}, // 1 = unlock
+        dps: {'1': true}, // 1 = unlock
       );
-      emit(DevicesLoaded());
+      emit(DeviceStateChanged(deviceId: devId));
     } catch (e) {
-      emit(DevicesError(message: 'Failed to unlock: $e'));
+      emit(
+        DeviceErrorChangedState(
+          deviceId: devId,
+          errorMessage: 'Failed to unlock: $e',
+        ),
+      );
     }
   }
 
@@ -61,7 +84,7 @@ class DevicesCubit extends Cubit<DevicesState> {
   ThingSmartUserModel? currentDevice;
   String? currentSSID;
   List<Map<String, dynamic>> devices = [];
-  bool _isScanning = false;
+  final bool _isScanning = false;
 
   bool get isScanning => _isScanning;
 

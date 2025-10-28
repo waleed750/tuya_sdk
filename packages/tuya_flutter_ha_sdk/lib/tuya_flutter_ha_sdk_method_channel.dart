@@ -36,8 +36,8 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
   }
 
   // ──────────────────────────────────────────────────────────────────────────────
-  // User Management
-  // ──────────────────────────────────────────────────────────────────────────────
+  // Method Channel Call
+  // ──────────────────────────────────────────────────────────────
 
   /// Login (or register) with UID.
   /// [countryCode],[uid],[password],[createHome] details are passed on to the native

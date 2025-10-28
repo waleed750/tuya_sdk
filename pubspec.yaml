@@ -52,6 +52,8 @@ dependencies:
   geolocator: ^14.0.2
   lucide_icons: 
   rename_app: ^1.6.5
+  cached_network_image: ^3.4.1
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
