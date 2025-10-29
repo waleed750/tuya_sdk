@@ -7,10 +7,10 @@ class DeviceDiscoveryList extends StatelessWidget {
   final void Function(DiscoveredDevice) onPair;
 
   const DeviceDiscoveryList({
-    Key? key,
+    super.key,
     required this.devices,
     required this.onPair,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

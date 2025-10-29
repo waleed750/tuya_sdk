@@ -9,7 +9,7 @@ import 'data/model/discover_device_model.dart';
 import 'widgets/device_discovery_list.dart';
 
 class WifiOnboardingPage extends StatefulWidget {
-  const WifiOnboardingPage({Key? key}) : super(key: key);
+  const WifiOnboardingPage({super.key});
 
   @override
   State<WifiOnboardingPage> createState() => _WifiOnboardingPageState();
