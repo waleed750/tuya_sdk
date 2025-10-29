@@ -54,3 +54,15 @@ class DeviceErrorChangedState extends DevicesState {
     required this.errorMessage,
   });
 }
+
+class DeviceRemoteUnlockRequested extends DevicesState {
+  final String deviceId;
+  final Map<String, dynamic> event;
+  const DeviceRemoteUnlockRequested({
+    required this.deviceId,
+    required this.event,
+  });
+
+  @override
+  List<Object?> get props => [deviceId, event];
+}

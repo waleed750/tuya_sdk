@@ -2,6 +2,11 @@
 
 package us.kpmsg.tuya_flutter_ha_sdk;
 
+// at top of file:
+import android.os.Build;
+import java.util.Arrays;
+import android.util.Log;
+
 import android.app.Application;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiInfo;
@@ -19,6 +24,8 @@ import com.thingclips.smart.home.sdk.ThingHomeSdk;
 import com.thingclips.smart.android.user.api.ILoginCallback;
 import com.thingclips.smart.android.user.bean.User;
 import com.thingclips.smart.android.user.api.ILogoutCallback;
+import com.thingclips.smart.optimus.lock.api.callback.RemoteUnlockListener;
+
 import com.thingclips.smart.sdk.api.IResultCallback;
 import com.thingclips.smart.sdk.enums.TempUnitEnum;
 import com.thingclips.smart.android.user.api.IReNickNameCallback;
@@ -207,20 +214,48 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                 result.success("Android " + android.os.Build.VERSION.RELEASE);
                 break;
 
-            case "tuyaSdkInit":
-                // init method of Tuya SDK is called along with appKey and appSecret to initialize the SDK
-                String appKey = call.argument("appKey");
-                String appSecret = call.argument("appSecret");
-                boolean isDebug = call.argument("isDebug");
-                if (appKey == null || appSecret == null) {
-                    result.error("MISSING_ARGS", "appKey and appSecret are required", null);
-                    return;
+           case "tuyaSdkInit": 
+            String appKey = call.argument("appKey");
+            String appSecret = call.argument("appSecret");
+            boolean isDebug = Boolean.TRUE.equals(call.argument("isDebug"));
+
+            if (appKey == null || appSecret == null) {
+                result.error("MISSING_ARGS", "appKey and appSecret are required", null);
+                break;
+            }
+
+            final String TAG = "TuyaInit";
+            boolean isEmulator =
+                    Build.FINGERPRINT != null && Build.FINGERPRINT.contains("generic")
+                 || Build.MODEL != null && (Build.MODEL.contains("Emulator") || Build.MODEL.contains("Android SDK"))
+                 || Build.MANUFACTURER != null && Build.MANUFACTURER.contains("Genymotion")
+                 || (Build.BRAND != null && Build.DEVICE != null
+                        && (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic")));
+
+            // If the emulator ABI is x86/x86_64 and Tuya libs are ARM-only, skip init in debug.
+            boolean isX86 = Arrays.toString(Build.SUPPORTED_ABIS).contains("x86");
+            boolean shouldSkipForEmu = isDebug && isEmulator && isX86;
+
+            try {
+                if (shouldSkipForEmu) {
+                    Log.w(TAG, "Skipping Tuya init on x86/x86_64 emulator (debug).");
+                    result.success(null); // don’t crash; your Flutter side should handle "no Tuya" in debug
+                    break;
                 }
-                // Initialize Tuya SDK using the Application instance
+
                 ThingHomeSdk.init(appContext, appKey, appSecret);
                 ThingHomeSdk.setDebugMode(isDebug);
+                Log.i(TAG, "Tuya SDK initialized OK");
                 result.success(null);
-                break;
+            } catch (UnsatisfiedLinkError e) {
+                Log.w(TAG, "Native libs missing (likely x86 emulator). Skipping Tuya init in debug.", e);
+                // You can still succeed to let the app run without Tuya on emulator
+                result.success(null);
+            } catch (Throwable t) {
+                Log.e(TAG, "Tuya init failed", t);
+                result.error("INIT_FAILED", t.getMessage(), null);
+            }
+            break;
 
             case "loginWithUid":
                 // loginOrRegisterWithUid function of the Tuya SDK is called with the passed on data
@@ -1242,7 +1277,9 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                 String unlockBLEDevId = call.argument("devId");
                 ThingOptimusSdk.init(activity);
                 IThingLockManager thingLockManager = ThingOptimusSdk.getManager(IThingLockManager.class);
+
                 IThingBleLockV2 thingLockDevice = thingLockManager.getBleLockV2(unlockBLEDevId);
+
                 thingLockDevice.getCurrentMemberDetail(new IThingResultCallback<BLELockUser>() {
                     @Override
                     public void onSuccess(BLELockUser result1) {
@@ -1276,6 +1313,7 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                 ThingOptimusSdk.init(activity);
                 IThingLockManager thingLockManagerBLeLock = ThingOptimusSdk.getManager(IThingLockManager.class);
                 IThingBleLockV2 thingLockDeviceBleLock = thingLockManagerBLeLock.getBleLockV2(lockBLEDevId);
+
                 thingLockDeviceBleLock.bleManualLock(new IResultCallback() {
                     @Override
                     public void onError(String code, String error) {
@@ -1297,13 +1335,13 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                 ThingOptimusSdk.init(activity);
                 IThingLockManager thingLockManagerWifiLock = ThingOptimusSdk.getManager(IThingLockManager.class);
                 IThingWifiLock thingLockDeviceWifiLock = thingLockManagerWifiLock.getWifiLock(unlockWifiDevId);
+
                 thingLockDeviceWifiLock.replyRemoteUnlock(allow, new IThingResultCallback<Boolean>() {
                     @Override
                     public void onError(String code, String message) {
                         Log.e("WIFI Lock", "reply remote unlock failed: code = " + code + "  message = " + message);
                         result.error("WIFI_UNLOCK_FAILED", message, "");
                     }
-
 
                     @Override
                     public void onSuccess(Boolean result1) {
@@ -1409,6 +1447,43 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                     }
                 });
                 break;
+            case "setRemoteUnlockListener": {
+                final String devId = call.argument("devId");
+
+                if (devId == null || devId.isEmpty()) {
+                    result.error("MISSING_ARGS", "devId is required", null);
+                    break;
+                }
+
+                // Initialize the SDK and get the lock manager
+                ThingOptimusSdk.init(activity);
+                IThingLockManager lockManager = ThingOptimusSdk.getManager(IThingLockManager.class);
+                IThingWifiLock wifiLock = lockManager.getWifiLock(devId);
+
+                if (wifiLock == null) {
+                    result.error("DEVICE_NOT_FOUND", "IThingWifiLock is null", null);
+                    break;
+                }
+
+                // Set the remote unlock listener
+                wifiLock.setRemoteUnlockListener(new RemoteUnlockListener() {
+                    @Override
+                    public void onReceive(String devId, int second) {
+                        if (second != 0) {
+                            Log.i("WIFI Lock", "Remote unlock request received for device: " + devId);
+                            Map<String, Object> event = new HashMap<>();
+                            event.put("devId", devId);
+                            event.put("timeout", second);
+                            if (eventSink != null) {
+                                eventSink.success(event);
+                            }
+                        }
+                    }
+                });
+
+                result.success(null);
+                break;
+            }
             default:
                 result.notImplemented();
                 break;

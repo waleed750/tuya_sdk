@@ -100,6 +100,10 @@ class DevicesCubit extends Cubit<DevicesState> {
   List<Map<String, dynamic>> devices = [];
   final bool _isScanning = false;
 
+  // Map to hold a stream subscription for each device
+  final Map<String, StreamSubscription<Map<String, dynamic>>>
+  _deviceUnlockStreams = {};
+
   bool get isScanning => _isScanning;
 
   Future<void> getCurrentSSID() async {
@@ -161,6 +165,11 @@ class DevicesCubit extends Cubit<DevicesState> {
   }
 
   Future<void> loadDevices() async {
+    // Dispose all previous device unlock streams before clearing devices
+    for (final sub in _deviceUnlockStreams.values) {
+      await sub.cancel();
+    }
+    _deviceUnlockStreams.clear();
     devices.clear();
     emit(DevicesLoading());
     devices = await TuyaFlutterHaSdk.getHomeDevices(homeId: currentHomeId ?? 0);
@@ -168,7 +177,50 @@ class DevicesCubit extends Cubit<DevicesState> {
       emit(DevicesError(message: 'No devices found'));
       return;
     } else {
+      // Listen to remote unlock events for each device
+      for (final device in devices) {
+        final devId = device['devId'] ?? device['id'];
+        if (devId != null) {
+          await listenToRemoteUnlock(devId);
+        }
+      }
       emit(DevicesLoaded());
     }
+  }
+
+  /// Call this when adding a new device to start listening for remote unlock events
+  Future<void> listenToRemoteUnlock(String devId) async {
+    // Set the remote unlock listener on the native side
+    await TuyaFlutterHaSdk.setRemoteUnlockListener(devId);
+    // Cancel any previous subscription for this device
+    await _deviceUnlockStreams[devId]?.cancel();
+    // Listen to the unlock event stream for this device
+    final sub = TuyaFlutterHaSdk.remoteUnlockEventStream?.listen((event) async {
+      if (event['devId'] == devId) {
+        log('Remote unlock event for $devId: $event');
+        // Emit state to show unlock request message
+        emit(DeviceRemoteUnlockRequested(deviceId: devId, event: event));
+        // Do NOT call replyRemoteUnlock here; let the UI handle unlock action
+      }
+    });
+    if (sub != null) {
+      _deviceUnlockStreams[devId] = sub;
+    }
+  }
+
+  /// Call this to stop listening for a device (e.g., when removing a device)
+  Future<void> stopListeningToRemoteUnlock(String devId) async {
+    await _deviceUnlockStreams[devId]?.cancel();
+    _deviceUnlockStreams.remove(devId);
+  }
+
+  @override
+  Future<void> close() async {
+    // Cancel all device unlock streams when cubit is closed
+    for (final sub in _deviceUnlockStreams.values) {
+      await sub.cancel();
+    }
+    _deviceUnlockStreams.clear();
+    return super.close();
   }
 }
