@@ -1,0 +1,4 @@
+R_DEF: Internal format may change without notice
+local
+id camera_video_view
+layout camera_video_view

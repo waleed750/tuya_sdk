@@ -1866,4 +1866,18 @@ class TuyaFlutterHaSdk {
       dps: dps,
     );
   }
+
+  /// Sets the remote unlock listener for a specific device.
+  static Future<void> setRemoteUnlockListener(String devId) {
+    return TuyaFlutterHaSdkPlatform.instance.setRemoteUnlockListener(devId);
+  }
+
+  /// Replies to a remote unlock request.
+  static Future<void> replyRemoteUnlock(String devId, bool allow) {
+    return TuyaFlutterHaSdkPlatform.instance.replyRemoteUnlock(devId, allow);
+  }
+
+  /// Stream for remote unlock requests.
+  static Stream<Map<String, dynamic>>? get remoteUnlockEventStream =>
+      TuyaFlutterHaSdkPlatform.instance.remoteUnlockEventStream;
 }

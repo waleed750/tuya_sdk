@@ -4,6 +4,35 @@ import 'tuya_flutter_ha_sdk_platform_interface.dart';
 
 /// The MethodChannel implementation of [TuyaFlutterHaSdkPlatform].
 class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
+  static const EventChannel _eventChannel = EventChannel(
+    'tuya_flutter_ha_sdk/remoteUnlockEvents',
+  );
+  Stream<Map<String, dynamic>>? _remoteUnlockEventStream;
+
+  @override
+  Future<void> setRemoteUnlockListener(String devId) async {
+    await methodChannel.invokeMethod('setRemoteUnlockListener', {
+      'devId': devId,
+    });
+  }
+
+  @override
+  Future<void> replyRemoteUnlock(String devId, bool allow) async {
+    // Use 'unlockWifiLock' to match the native Android implementation
+    await methodChannel.invokeMethod('unlockWifiLock', {
+      'devId': devId,
+      'allow': allow,
+    });
+  }
+
+  @override
+  Stream<Map<String, dynamic>>? get remoteUnlockEventStream {
+    _remoteUnlockEventStream ??= _eventChannel.receiveBroadcastStream().map(
+      (event) => Map<String, dynamic>.from(event),
+    );
+    return _remoteUnlockEventStream;
+  }
+
   /// The MethodChannel used to talk to the native side.
   @visibleForTesting
   final MethodChannel methodChannel = const MethodChannel(

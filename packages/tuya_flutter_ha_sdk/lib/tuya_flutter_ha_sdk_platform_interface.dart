@@ -316,4 +316,13 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
     required String devId,
     required Map<String, dynamic> dps,
   });
+
+  /// Sets the remote unlock listener for a specific device
+  Future<void> setRemoteUnlockListener(String devId);
+
+  /// Replies to a remote unlock request
+  Future<void> replyRemoteUnlock(String devId, bool allow);
+
+  /// Stream for remote unlock requests
+  Stream<Map<String, dynamic>>? get remoteUnlockEventStream;
 }
