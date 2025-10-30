@@ -254,10 +254,6 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
             } catch (Throwable t) {
                 Log.e(TAG, "Tuya init failed", t);
                 result.error("INIT_FAILED", t.getMessage(), null);
-            } catch (Exception e) {
-                    Log.e(TAG, "Exception in ThingHomeSdk.init", e);
-                    result.error("INIT_FAILED", "Exception in ThingHomeSdk.init: " + e.getMessage(), null);
-                    break;
             }
             break;
 
