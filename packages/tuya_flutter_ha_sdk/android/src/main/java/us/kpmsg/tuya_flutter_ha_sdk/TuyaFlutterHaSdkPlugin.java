@@ -250,10 +250,14 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
             } catch (UnsatisfiedLinkError e) {
                 Log.w(TAG, "Native libs missing (likely x86 emulator). Skipping Tuya init in debug.", e);
                 // You can still succeed to let the app run without Tuya on emulator
-                result.success(null);
+                result.error("INIT_FAILED", "Native libs missing (likely x86 emulator). Skipping Tuya init in debug.", null);
             } catch (Throwable t) {
                 Log.e(TAG, "Tuya init failed", t);
                 result.error("INIT_FAILED", t.getMessage(), null);
+            } catch (Exception e) {
+                    Log.e(TAG, "Exception in ThingHomeSdk.init", e);
+                    result.error("INIT_FAILED", "Exception in ThingHomeSdk.init: " + e.getMessage(), null);
+                    break;
             }
             break;
 
