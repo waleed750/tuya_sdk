@@ -239,7 +239,7 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
             try {
                 if (shouldSkipForEmu) {
                     Log.w(TAG, "Skipping Tuya init on x86/x86_64 emulator (debug).");
-                    result.success(null); // don’t crash; your Flutter side should handle "no Tuya" in debug
+                    result.error("INIT_FAILED", "Skipping Tuya init on x86/x86_64 emulator (debug).", null); //(null); // don’t crash; your Flutter side should handle "no Tuya" in debug
                     break;
                 }
 
