@@ -1076,7 +1076,6 @@ class TuyaFlutterHaSdk {
     );
   }
 
-
   /// Get the signal strength of a specific device
   ///
   /// Example Usage:
