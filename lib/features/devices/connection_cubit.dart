@@ -233,6 +233,19 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
     }
   }
 
+  /// Delete/unbind a device by devId using the Tuya SDK.
+  /// This calls the plugin's removeDevice implementation and emits an error
+  /// state on failure. On success the cubit returns to idle.
+  Future<void> deleteDevice({required String devId}) async {
+    try {
+      if (devId.isEmpty) throw Exception('devId is required');
+      await TuyaFlutterHaSdk.removeDevice(devId: devId);
+      emit(OnboardingIdle());
+    } catch (e) {
+      emit(OnboardingError(e.toString()));
+    }
+  }
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Helpers
   // ─────────────────────────────────────────────────────────────────────────────

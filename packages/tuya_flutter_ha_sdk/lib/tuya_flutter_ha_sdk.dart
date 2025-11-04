@@ -1042,6 +1042,17 @@ class TuyaFlutterHaSdk {
     return TuyaFlutterHaSdkPlatform.instance.removeDevice(devId: devId);
   }
 
+  /// Alias for `removeDevice` named `deleteDevice` to match Tuya docs and
+  /// make intent clearer in calling code.
+  ///
+  /// Example usage:
+  /// ```dart
+  /// await deleteDevice(devId: "abcd");
+  /// ```
+  static Future<void> deleteDevice({required String devId}) {
+    return removeDevice(devId: devId);
+  }
+
   /// Restore factory defaults for a specific device
   ///
   /// Example Usage:
@@ -1064,6 +1075,7 @@ class TuyaFlutterHaSdk {
       devId: devId,
     );
   }
+
 
   /// Get the signal strength of a specific device
   ///

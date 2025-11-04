@@ -1071,6 +1071,35 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                 });
 
                 break;
+            case "deleteDevice":
+                // deleteDevice is an alias for removeDevice - provided for clarity
+                // Matches Tuya docs: call removeDevice on the IThingDevice instance
+                String deleteDeviceId = call.argument("devId");
+                if (deleteDeviceId == null || deleteDeviceId.isEmpty()) {
+                    result.error("MISSING_ARGS", "devId is required", null);
+                    break;
+                }
+                try {
+                    IThingDevice deviceToDelete = ThingHomeSdk.newDeviceInstance(deleteDeviceId);
+                    deviceToDelete.removeDevice(new IResultCallback() {
+                        @Override
+                        public void onError(String errorCode, String errorMsg) {
+                            Log.e("TuyaDeleteDevice", "removeDevice onError: " + errorCode + " -> " + errorMsg);
+                            result.error("DELETE_DEVICE_FAILED", errorMsg + " (code: " + errorCode + ")", null);
+                        }
+
+                        @Override
+                        public void onSuccess() {
+                            Log.i("TuyaDeleteDevice", "removeDevice onSuccess for devId=" + deleteDeviceId);
+                            result.success(null);
+                        }
+                    });
+                } catch (Throwable t) {
+                    Log.e("TuyaDeleteDevice", "deleteDevice threw", t);
+                    result.error("DELETE_DEVICE_EXCEPTION", t.getMessage(), null);
+                }
+                break;
+            // (activateDiscoveredWiFiDevice removed - not needed)
             case "restoreFactoryDefaults":
                 // resetFactory function of Tuya SDK is called
                 String restoreDeviceId = call.argument("devId");

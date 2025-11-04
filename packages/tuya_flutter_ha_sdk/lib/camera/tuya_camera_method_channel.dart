@@ -1,15 +1,21 @@
+import 'dart:developer';
+
 import 'package:flutter/services.dart';
 import 'tuya_camera_platform_interface.dart';
 
 class TuyaCameraMethodChannel extends TuyaCameraPlatform {
-  static const MethodChannel _channel = MethodChannel('tuya_flutter_ha_sdk/camera');
+  static const MethodChannel _channel = MethodChannel(
+    'tuya_flutter_ha_sdk/camera',
+  );
 
   /// Get a list of cameras added to a home
   /// [homeId] details is passed on to native
   /// listCamera function of native is invoked
   @override
   Future<List<Map<String, dynamic>>> listCameras({required int homeId}) async {
-    final List<dynamic> result = await _channel.invokeMethod('listCameras', {'homeId': homeId});
+    final List<dynamic> result = await _channel.invokeMethod('listCameras', {
+      'homeId': homeId,
+    });
     return result.cast<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
@@ -17,10 +23,14 @@ class TuyaCameraMethodChannel extends TuyaCameraPlatform {
   /// [deviceId] details is passed on to native
   /// getCameraCapabilities function of native is invoked
   @override
-  Future<Map<String, dynamic>> getCameraCapabilities({required String deviceId}) async {
-    print("before calling capabilities");
-    final Map result = await _channel.invokeMethod('getCameraCapabilities', {'deviceId': deviceId});
-    print("after calling capabilities");
+  Future<Map<String, dynamic>> getCameraCapabilities({
+    required String deviceId,
+  }) async {
+    log("before calling capabilities");
+    final Map result = await _channel.invokeMethod('getCameraCapabilities', {
+      'deviceId': deviceId,
+    });
+    log("after calling capabilities");
     return Map<String, dynamic>.from(result);
   }
 
@@ -44,8 +54,15 @@ class TuyaCameraMethodChannel extends TuyaCameraPlatform {
   /// [deviceId], [year], [month] details are passed to native
   /// getDeviceAlerts function of native is invoked
   @override
-  Future<List<Map<String, dynamic>>> getDeviceAlerts({required String deviceId,required int year, required int month}) async {
-    final List<dynamic> result = await _channel.invokeMethod('getDeviceAlerts', {'deviceId': deviceId,'year':year,'month':month});
+  Future<List<Map<String, dynamic>>> getDeviceAlerts({
+    required String deviceId,
+    required int year,
+    required int month,
+  }) async {
+    final List<dynamic> result = await _channel.invokeMethod(
+      'getDeviceAlerts',
+      {'deviceId': deviceId, 'year': year, 'month': month},
+    );
     return result.cast<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
@@ -72,12 +89,13 @@ class TuyaCameraMethodChannel extends TuyaCameraPlatform {
     required String deviceId,
     required Map<String, dynamic> dps,
   }) async {
-    print("dps");
-    print(dps);
-    return await _channel.invokeMethod<bool>(
-      'setDeviceDpConfigs',
-      {'deviceId': deviceId, 'dps': dps},
-    ) ?? false;
+    log("dps");
+    log(dps.toString());
+    return await _channel.invokeMethod<bool>('setDeviceDpConfigs', {
+          'deviceId': deviceId,
+          'dps': dps,
+        }) ??
+        false;
   }
 
   /// Get the current configurations of set of DP codes on a device
@@ -87,8 +105,10 @@ class TuyaCameraMethodChannel extends TuyaCameraPlatform {
   Future<List<Map<String, dynamic>>> getDeviceDpConfigs({
     required String deviceId,
   }) async {
-    final List<dynamic> result =
-    await _channel.invokeMethod('getDeviceDpConfigs', {'deviceId': deviceId});
+    final List<dynamic> result = await _channel.invokeMethod(
+      'getDeviceDpConfigs',
+      {'deviceId': deviceId},
+    );
     return result.cast<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
@@ -96,8 +116,11 @@ class TuyaCameraMethodChannel extends TuyaCameraPlatform {
   /// [type],[isOpen] details are passed on to native
   /// registerPush function of native is invoked
   @override
-  Future<void> registerPush({required int type,required bool isOpen}) {
-    return _channel.invokeMethod('registerPush',{'type':type,'isOpen':isOpen});
+  Future<void> registerPush({required int type, required bool isOpen}) {
+    return _channel.invokeMethod('registerPush', {
+      'type': type,
+      'isOpen': isOpen,
+    });
   }
 
   /// Get all messages
@@ -105,7 +128,6 @@ class TuyaCameraMethodChannel extends TuyaCameraPlatform {
   @override
   Future<List<Map<String, dynamic>>> getAllMessages() async {
     final List<dynamic> result = await _channel.invokeMethod("getAllMessages");
-    return result.cast<Map>().map((e)=>Map<String,dynamic>.from(e)).toList();
-
+    return result.cast<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
   }
 }

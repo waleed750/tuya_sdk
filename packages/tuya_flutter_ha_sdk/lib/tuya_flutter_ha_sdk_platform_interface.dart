@@ -224,6 +224,10 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
 
   /// Init the device
   Future<void> initDevice({required String devId});
+  /// Remove (delete/unbind) a specific device. This mirrors the native
+  /// `deleteDevice`/`removeDevice` behavior and is provided as a clear API
+  /// for callers who prefer the term "delete".
+  Future<void> deleteDevice({required String devId});
 
   /// Query information about a device
   Future<Map<String, dynamic>?> queryDeviceInfo({

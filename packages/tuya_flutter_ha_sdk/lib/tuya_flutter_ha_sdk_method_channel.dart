@@ -502,6 +502,15 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
     });
   }
 
+  /// Delete/unbind a specific device. This calls the native `deleteDevice`
+  /// handler which in turn calls the Tuya SDK `removeDevice`.
+  @override
+  Future<void> deleteDevice({required String devId}) async {
+    await methodChannel.invokeMethod<void>("deleteDevice", <String, dynamic>{
+      'devId': devId,
+    });
+  }
+
   /// Query information about a device
   /// [devId],[dps] details are passed on to native
   /// queryDeviceInfo function of native is invoked
