@@ -92,6 +92,8 @@ import org.jetbrains.annotations.Nullable;
  * TuyaFlutterHaSdkPlugin
  */
 public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware {
+    // Prevent double-triggers while scanning and pairing
+    private volatile boolean mAutoPairingInProgress = false;
     private MethodChannel channel;
     private Application appContext;
     IThingActivator mThingActivator;
@@ -157,6 +159,8 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
 
         }
 
+        // Reset auto-pairing flag
+        mAutoPairingInProgress = false;
 
     }
 
@@ -947,6 +951,182 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                     }
                 });
                 break;
+            
+            case "wifiBleComboConfig": {
+                // One-shot: scan for a BLE+Wi-Fi combo device, then pair it.
+                // Required: ssid, homeId
+                // Optional: password, token (if absent we fetch), productId/uuid filter, scanTimeout (ms), pairTimeout (s)
+                checkPermission();
+                stopAnyPairingOrScan();
+
+                final String ssid = call.argument("ssid");
+                final String password = call.argument("password");                   // can be null
+                final Number homeIdNum = call.argument("homeId");                    // required
+                final String tokenArg = call.argument("token");                      // optional
+                final String targetProductId = call.argument("productId");           // optional
+                final String targetUuid = call.argument("uuid");                     // optional (BLE UUID filter)
+                final Number scanTimeoutMsNum = call.argument("scanTimeout");        // optional (ms)
+                final Number pairTimeoutSecNum = call.argument("timeout");           // optional (s)
+
+                if (ssid == null || homeIdNum == null) {
+                    result.error("MISSING_ARGS", "ssid and homeId are required", null);
+                    break;
+                }
+                if (mAutoPairingInProgress) {
+                    result.error("BUSY", "Auto pairing already in progress", null);
+                    break;
+                }
+                mAutoPairingInProgress = true;
+
+                final long homeId = homeIdNum.longValue();
+                final int scanTimeoutMs = (scanTimeoutMsNum != null && scanTimeoutMsNum.intValue() > 0)
+                        ? scanTimeoutMsNum.intValue() : 60_000;
+                final int pairTimeoutMs = (pairTimeoutSecNum != null && pairTimeoutSecNum.intValue() > 0)
+                        ? pairTimeoutSecNum.intValue() * 1000 : 120_000;
+
+                // Emit scan start
+                Map<String, Object> scanStart = new HashMap<>();
+                scanStart.put("ssid", ssid);
+                scanStart.put("homeId", homeId);
+                if (targetProductId != null) scanStart.put("filterProductId", targetProductId);
+                if (targetUuid != null)      scanStart.put("filterUuid", targetUuid);
+                emitEvent("auto.onScanStart", scanStart);
+
+                // 1) Start BLE scan
+                LeScanSetting setting = new LeScanSetting.Builder()
+                        .setTimeout(scanTimeoutMs)
+                        .addScanType(ScanType.SINGLE)
+                        .build();
+
+                ThingHomeSdk.getBleOperator().startLeScan(setting, new BleScanResponse() {
+                    @Override
+                    public void onResult(ScanDeviceBean bean) {
+                        if (!mAutoPairingInProgress) return; // stopped already
+
+                        // Report every candidate (useful for UI logs)
+                        HashMap<String, Object> candidate = new HashMap<>();
+                        candidate.put("name", bean.getName());
+                        candidate.put("productId", bean.getProductId());
+                        candidate.put("uuid", bean.getUuid());
+                        candidate.put("mac", bean.getMac());
+                        candidate.put("address", bean.getAddress());
+                        candidate.put("flag", bean.getFlag());
+                        candidate.put("deviceType", bean.getDeviceType());
+                        candidate.put("configType", bean.getConfigType());
+                        emitEvent("auto.onCandidate", candidate);
+
+                        // We only want BLE+Wi-Fi combo devices. Tuya docs: configType == 2 means combo.
+                        final boolean isCombo = (bean.getConfigType() == 2);
+                        if (!isCombo) return;
+
+                        // Apply optional filters
+                        if (targetProductId != null && !targetProductId.equals(bean.getProductId())) return;
+                        if (targetUuid != null && !targetUuid.equals(bean.getUuid())) return;
+
+                        // Reject beacons (flag==9) which can’t be paired
+                        if (bean.getFlag() == 9) return;
+
+                        // We found a valid candidate — stop scanning to avoid multiple triggers
+                        ThingHomeSdk.getBleOperator().stopLeScan();
+
+                        // 2) Build activator bean
+                        MultiModeActivatorBean mm = new MultiModeActivatorBean();
+                        mm.uuid = bean.getUuid();
+                        mm.ssid = ssid;
+                        mm.pwd = (password == null) ? "" : password;
+                        mm.homeId = homeId;
+                        mm.address = bean.getAddress();      // BLE address used in handshake
+                        mm.mac = bean.getMac();              // optional but helpful
+                        mm.deviceType = bean.getDeviceType();// carry through
+                        mm.timeout = pairTimeoutMs;          // ms
+
+                        mComboActivatorUuid = bean.getUuid();
+
+                        // 3) Acquire token if needed, then pair
+                        final java.util.function.Consumer<String> startPairing = tkn -> {
+                            if (!mAutoPairingInProgress) return;
+                            mm.token = tkn;
+
+                            Map<String, Object> pairStart = new HashMap<>();
+                            pairStart.put("uuid", bean.getUuid());
+                            pairStart.put("productId", bean.getProductId());
+                            emitEvent("auto.onPairStart", pairStart);
+
+                            mComboActivator = ThingHomeSdk.getActivator().newMultiModeActivator();
+                            mComboActivator.startActivator(mm, new IMultiModeActivatorListener() {
+                                @Override
+                                public void onSuccess(DeviceBean deviceBean) {
+                                    HashMap<String, Object> deviceDetails = new HashMap<>();
+                                    deviceDetails.put("devId", deviceBean.getDevId());
+                                    deviceDetails.put("name", deviceBean.getName());
+                                    deviceDetails.put("productId", deviceBean.getProductId());
+                                    deviceDetails.put("uuid", deviceBean.getUuid());
+                                    deviceDetails.put("iconUrl", deviceBean.getIconUrl());
+                                    deviceDetails.put("isOnline", deviceBean.getIsOnline());
+                                    deviceDetails.put("isCloudOnline", deviceBean.isCloudOnline());
+                                    deviceDetails.put("mac", deviceBean.getMac());
+                                    deviceDetails.put("dps", deviceBean.getDps());
+
+                                    emitEvent("auto.onSuccess", new HashMap<>(deviceDetails));
+                                    result.success(deviceDetails);
+                                    stopAnyPairingOrScan();
+                                }
+
+                                @Override
+                                public void onFailure(int code, String msg, Object handle) {
+                                    Map<String, Object> err = new HashMap<>();
+                                    err.put("errorCode", code);
+                                    err.put("errorMessage", msg);
+                                    emitEvent("auto.onError", err);
+                                    result.error("AUTO_COMBO_FAILED", msg, code);
+                                    stopAnyPairingOrScan();
+                                }
+                            });
+                        };
+
+                        if (tokenArg != null && !tokenArg.isEmpty()) {
+                            startPairing.accept(tokenArg);
+                        } else {
+                            // Fetch a fresh token for this home
+                            ThingHomeSdk.getActivatorInstance().getActivatorToken((int) homeId,
+                                    new IThingActivatorGetToken() {
+                                        @Override
+                                        public void onSuccess(String token) {
+                                            startPairing.accept(token);
+                                        }
+                                        @Override
+                                        public void onFailure(String code, String error) {
+                                            Map<String, Object> err = new HashMap<>();
+                                            err.put("errorCode", code);
+                                            err.put("errorMessage", error);
+                                            emitEvent("auto.onError", err);
+                                            result.error("TOKEN_FAILED", error, code);
+                                            stopAnyPairingOrScan();
+                                        }
+                                    });
+                        }
+                    }
+                });
+
+                // As a safety net, also schedule a hard stop when scan times out
+                activity.getWindow().getDecorView().postDelayed(() -> {
+                    if (!mAutoPairingInProgress) return;
+                    ThingHomeSdk.getBleOperator().stopLeScan();
+                    // If nothing triggered pairing within scan window, report error
+                    if (mComboActivator == null) {
+                        Map<String, Object> err = new HashMap<>();
+                        err.put("errorCode", "SCAN_TIMEOUT");
+                        err.put("errorMessage", "No combo device found within scan timeout");
+                        emitEvent("auto.onError", err);
+                        result.error("SCAN_TIMEOUT", "No combo device found", null);
+                        stopAnyPairingOrScan();
+                    }
+                }, scanTimeoutMs);
+
+                break;
+            }
+
+
             case "initDevice":
                 // calls the registerDevListener function of Tuya SDK
                 String initDeviceId = call.argument("devId");

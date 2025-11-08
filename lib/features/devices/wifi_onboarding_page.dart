@@ -61,6 +61,8 @@ class _WifiOnboardingPageState extends State<WifiOnboardingPage> {
               Text(
                 _mode == 'AP'
                     ? 'AP mode: connect your phone to the device hotspot (e.g., SmartLife-XXXX), then return here.'
+                    : _mode == 'Combo'
+                    ? 'Combo mode: automatically discovers and pairs Wi-Fi + BLE dual-mode devices.'
                     : 'EZ mode: keep the phone on 2.4 GHz Wi-Fi and make sure the device LED is flashing fast.',
               ),
               Text(
@@ -82,6 +84,10 @@ class _WifiOnboardingPageState extends State<WifiOnboardingPage> {
                   DropdownMenuItem(
                     value: 'AP',
                     child: Text('AP (Device Hotspot)'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Combo',
+                    child: Text('Combo (Wi-Fi + BLE)'),
                   ),
                 ],
                 onChanged: (v) => setState(() => _mode = v ?? 'AP'),
@@ -173,15 +179,30 @@ class _WifiOnboardingPageState extends State<WifiOnboardingPage> {
                                     return;
                                   }
 
-                                  await context
-                                      .read<connection.ConnecitonCubit>()
-                                      .startWifiScan(
-                                        homeId: devicesCubit.currentHomeId!,
-                                        ssid: ssid,
-                                        wifiPassword: pwd,
-                                        mode: _mode, // 'EZ' or 'AP'
-                                        timeoutSeconds: 120,
-                                      );
+                                  // Check mode and call appropriate method
+                                  if (_mode == 'Combo') {
+                                    // Use combo pairing
+                                    await context
+                                        .read<connection.ConnecitonCubit>()
+                                        .startWifiBleComboConfig(
+                                          homeId: devicesCubit.currentHomeId!,
+                                          ssid: ssid,
+                                          wifiPassword: pwd,
+                                          scanTimeoutSeconds: 30,
+                                          pairTimeoutSeconds: 120,
+                                        );
+                                  } else {
+                                    // Use regular Wi-Fi scan (EZ or AP mode)
+                                    await context
+                                        .read<connection.ConnecitonCubit>()
+                                        .startWifiScan(
+                                          homeId: devicesCubit.currentHomeId!,
+                                          ssid: ssid,
+                                          wifiPassword: pwd,
+                                          mode: _mode, // 'EZ' or 'AP'
+                                          timeoutSeconds: 120,
+                                        );
+                                  }
                                 },
                           child: Row(
                             spacing: 10,

@@ -180,6 +180,99 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
+  // Wi-Fi + BLE Combo Pairing (Automatic)
+  // ─────────────────────────────────────────────────────────────────────────────
+  /// Start automatic Wi-Fi + BLE combo pairing.
+  /// This scans for combo devices and automatically pairs the first match.
+  Future<void> startWifiBleComboConfig({
+    required int homeId,
+    required String ssid,
+    required String wifiPassword,
+    String? productId,
+    String? uuid,
+    int scanTimeoutSeconds = 60,
+    int pairTimeoutSeconds = 120,
+  }) async {
+    try {
+      if (isScanning) await _stopAll();
+      isScanning = true;
+
+      _startCountdown(pairTimeoutSeconds, 'combo');
+      _ensurePairingEventsSubscribed();
+
+      // Listen for auto-pairing events
+      final autoSub = TuyaFlutterHaSdk.pairingEvents.listen((ev) {
+        final type = ev['type'] as String? ?? '';
+
+        switch (type) {
+          case 'auto.onScanStart':
+            log('Combo: Scan started');
+            break;
+
+          case 'auto.onCandidate':
+            final name = ev['name'] ?? 'Unknown';
+            final pid = ev['productId'] ?? '';
+            log('Combo: Found candidate - $name ($pid)');
+            break;
+
+          case 'auto.onPairStart':
+            final deviceUuid = ev['uuid'] ?? '';
+            log('Combo: Pairing started for $deviceUuid');
+            emit(
+              OnboardingScanning(protocol: 'combo', secondsLeft: _secondsLeft),
+            );
+            break;
+
+          case 'auto.onSuccess':
+            final found = _mapSingle(ev, fallbackType: 'combo');
+            if (found != null) {
+              device = found;
+              emit(OnboardingDevicesFound([found], protocol: 'combo'));
+              emit(OnboardingPairedSuccess(found));
+            }
+            break;
+
+          case 'auto.onError':
+            final msg = ev['errorMessage'] ?? 'Combo pairing error';
+            emit(OnboardingError(msg));
+            break;
+        }
+      });
+
+      // Start the automatic combo pairing
+      final raw = await TuyaFlutterHaSdk.wifiBleComboConfig(
+        ssid: ssid,
+        password: wifiPassword,
+        homeId: homeId,
+        productId: productId,
+        uuid: uuid,
+        scanTimeout: scanTimeoutSeconds * 1000, // Convert to milliseconds
+        timeout: pairTimeoutSeconds,
+      );
+
+      await autoSub.cancel();
+
+      final found = _mapSingle(raw, fallbackType: 'combo');
+      if (found != null) {
+        device = found;
+        emit(OnboardingDevicesFound([found], protocol: 'combo'));
+        emit(OnboardingPairedSuccess(found));
+      } else {
+        emit(const OnboardingError('Combo pairing returned no device details'));
+      }
+
+      await _stopAll();
+    } catch (e) {
+      emit(OnboardingError(e.toString()));
+      await _stopAll();
+    }
+  }
+
+  Future<void> stopWifiBleComboConfig() async {
+    await _stopAll();
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
   // Pair button
   // Wi-Fi: pairing happens during startConfigWiFi → just stop & success.
   // BLE: call pairBleDevice with homeId, uuid, productId (and optional extras).

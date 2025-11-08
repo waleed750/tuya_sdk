@@ -222,6 +222,35 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
     int? flag,
   });
 
+  /// Wi-Fi + BLE combo configuration pairing (automatic flow).
+  ///
+  /// This method automatically:
+  /// 1. Scans for BLE devices
+  /// 2. Filters for Wi-Fi + BLE combo devices (configType == 2)
+  /// 3. Pairs the first matching device with Wi-Fi credentials
+  ///
+  /// Required parameters:
+  /// - ssid: Wi-Fi network SSID
+  /// - homeId: Home ID where device will be added
+  ///
+  /// Optional parameters:
+  /// - password: Wi-Fi network password (empty string for open networks)
+  /// - token: Pairing token (fetched automatically if not provided)
+  /// - productId: Filter devices by product ID
+  /// - uuid: Filter devices by UUID
+  /// - scanTimeout: BLE scan timeout in milliseconds (default: 60000)
+  /// - timeout: Pairing timeout in seconds (default: 120)
+  Future<Map<String, dynamic>?> wifiBleComboConfig({
+    required String ssid,
+    required int homeId,
+    String? password,
+    String? token,
+    String? productId,
+    String? uuid,
+    int? scanTimeout,
+    int? timeout,
+  });
+
   /// Init the device
   Future<void> initDevice({required String devId});
 

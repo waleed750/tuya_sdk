@@ -492,6 +492,33 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
     return Map<String, dynamic>.from(result);
   }
 
+  /// Wi-Fi + BLE combo configuration pairing (automatic flow).
+  /// Automatically scans for combo devices and pairs the first match.
+  @override
+  Future<Map<String, dynamic>?> wifiBleComboConfig({
+    required String ssid,
+    required int homeId,
+    String? password,
+    String? token,
+    String? productId,
+    String? uuid,
+    int? scanTimeout,
+    int? timeout,
+  }) async {
+    final Map<dynamic, dynamic> result = await methodChannel
+        .invokeMethod('wifiBleComboConfig', <String, dynamic>{
+          'ssid': ssid,
+          'homeId': homeId,
+          'password': password,
+          'token': token,
+          'productId': productId,
+          'uuid': uuid,
+          'scanTimeout': scanTimeout,
+          'timeout': timeout,
+        });
+    return Map<String, dynamic>.from(result);
+  }
+
   /// Init the device
   /// [devId] is passed on to native
   /// initDevice function on native is invoked

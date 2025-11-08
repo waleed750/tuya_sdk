@@ -936,6 +936,103 @@ class TuyaFlutterHaSdk {
     );
   }
 
+  /// Wi-Fi + BLE combo configuration pairing (automatic one-shot flow).
+  ///
+  /// This method automatically handles the complete pairing flow:
+  /// 1. **Scans** for BLE devices that support Wi-Fi + BLE combo mode
+  /// 2. **Filters** devices based on optional criteria (productId, uuid)
+  /// 3. **Pairs** the first matching device with the provided Wi-Fi credentials
+  ///
+  /// This is a simplified alternative to manually calling `discoverDeviceInfo()`
+  /// followed by `startComboPairing()`.
+  ///
+  /// **Events emitted** (via pairingEvents stream):
+  /// - `auto.onScanStart`: Scan has started
+  /// - `auto.onCandidate`: Each discovered device (for logging/debugging)
+  /// - `auto.onPairStart`: Pairing process has started for a device
+  /// - `auto.onSuccess`: Device successfully paired
+  /// - `auto.onError`: Error occurred during scan or pairing
+  ///
+  /// Example Usage:
+  /// ```dart
+  /// // Listen to events (optional)
+  /// TuyaFlutterHaSdk.pairingEvents.listen((event) {
+  ///   print('Event: ${event['type']}');
+  ///   if (event['type'] == 'auto.onCandidate') {
+  ///     print('Found device: ${event['name']}');
+  ///   }
+  /// });
+  ///
+  /// // Start automatic pairing
+  /// Map<String, dynamic>? result = await TuyaFlutterHaSdk.wifiBleComboConfig(
+  ///   ssid: "MyWiFi",
+  ///   password: "wifipassword",
+  ///   homeId: 12345,
+  ///   // Optional filters:
+  ///   productId: "abc123",  // Only pair devices with this product ID
+  ///   scanTimeout: 30000,   // Scan for 30 seconds (default: 60s)
+  ///   timeout: 120,         // Pairing timeout in seconds (default: 120s)
+  /// );
+  ///
+  /// print('Paired device: ${result?['devId']}');
+  /// ```
+  ///
+  /// **Required Parameters:**
+  /// - [ssid]: Wi-Fi network SSID to connect the device to
+  /// - [homeId]: Home ID where the device will be added
+  ///
+  /// **Optional Parameters:**
+  /// - [password]: Wi-Fi network password (defaults to empty for open networks)
+  /// - [token]: Pairing token (automatically fetched if not provided)
+  /// - [productId]: Filter to only pair devices with this product ID
+  /// - [uuid]: Filter to only pair devices with this UUID
+  /// - [scanTimeout]: BLE scan timeout in milliseconds (default: 60000)
+  /// - [timeout]: Pairing timeout in seconds (default: 120)
+  ///
+  /// Returns device information map on successful pairing, including:
+  /// - `devId`: Device ID
+  /// - `name`: Device name
+  /// - `productId`: Product ID
+  /// - `uuid`: Device UUID
+  /// - `mac`: MAC address
+  /// - `dps`: Device data points
+  /// - Additional device metadata
+  ///
+  /// Throws [PlatformException] on failure (scan timeout, pairing error, etc.)
+  static Future<Map<String, dynamic>?> wifiBleComboConfig({
+    required String ssid,
+    required int homeId,
+    String? password,
+    String? token,
+    String? productId,
+    String? uuid,
+    int? scanTimeout,
+    int? timeout,
+  }) {
+    if (ssid.isEmpty) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "ssid should be specified",
+      );
+    }
+    if (homeId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeId should be specified",
+      );
+    }
+    return TuyaFlutterHaSdkPlatform.instance.wifiBleComboConfig(
+      ssid: ssid,
+      homeId: homeId,
+      password: password,
+      token: token,
+      productId: productId,
+      uuid: uuid,
+      scanTimeout: scanTimeout,
+      timeout: timeout,
+    );
+  }
+
   /// Init the device
   ///
   /// Example Usage:
