@@ -432,6 +432,21 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
     );
   }
 
+  /// Performs a single-device smart BLE pairing flow on the native side.
+  /// Returns the paired device info map on success, or null on timeout/failure.
+  @override
+  Future<Map<String, dynamic>?> smartBlePairing({
+    required int homeId,
+    int timeoutSeconds = 30,
+  }) async {
+    final Map<dynamic, dynamic>? result = await methodChannel
+        .invokeMethod<Map<dynamic, dynamic>>('smartBlePairing', <String, dynamic>{
+      'homeId': homeId,
+      'timeoutSeconds': timeoutSeconds,
+    });
+    return result == null ? null : Map<String, dynamic>.from(result);
+  }
+
   /// Activate (pair) a pure-BLE device with the cloud.
   /// [uuid],[productId],[homeId],[deviceType],[address] details is passed on to native
   /// pairBleDevice function on native is invoked

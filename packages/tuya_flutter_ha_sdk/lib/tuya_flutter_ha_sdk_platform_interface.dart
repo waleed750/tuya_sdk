@@ -197,6 +197,15 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
   /// Returns its raw JSON map, or null if none found.
   Future<Map<String, dynamic>?> discoverDeviceInfo();
 
+  /// Native helper that performs a full "smart" BLE pairing flow:
+  /// 1) Scans for a single compatible BLE device
+  /// 2) If found, starts BLE configuration (activation) using the SDK
+  /// 3) Returns the paired device details on success or null
+  Future<Map<String, dynamic>?> smartBlePairing({
+    required int homeId,
+    int timeoutSeconds = 30,
+  });
+
   /// Activate (pair) a pure-BLE device with the cloud.
   Future<Map<String, dynamic>?> pairBleDevice({
     required String uuid,

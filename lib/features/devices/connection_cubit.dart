@@ -139,7 +139,7 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
   // advertising Tuya packets” and then stops the scan internally.
   // So we poll it; once it returns a device ONCE, we emit it and STOP polling.
   // ─────────────────────────────────────────────────────────────────────────────
-  Future<void> startBleScan({int timeoutSeconds = 30}) async {
+  Future<void> startBleScan({int timeoutSeconds = 30, int? homeId}) async {
     try {
       if (isScanning) await _stopAll();
       isScanning = true;
@@ -148,27 +148,39 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
       _startCountdown(timeoutSeconds, 'ble');
       _ensurePairingEventsSubscribed(); // <— add
 
-      // Poll every 2s. Each call starts a short scan under the hood and returns
-      // the FIRST inactivated Tuya BLE device if found, then ends the native scan.
-      _pollTimer?.cancel();
-      _pollTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
-        if (!isScanning || bleDevice != null) return;
+      if (homeId != null) {
+        // Use native smart BLE pairing helper: scans once and pairs the device.
         try {
-          final raw = await TuyaFlutterHaSdk.discoverDeviceInfo();
+          final raw = await TuyaFlutterHaSdk.smartBlePairing(homeId: homeId, timeoutSeconds: timeoutSeconds);
           final found = _mapSingle(raw, fallbackType: 'ble');
           if (found != null) {
             bleDevice = found;
             emit(OnboardingDevicesFound([bleDevice!], protocol: 'ble'));
-
-            // We STOP polling right after the first result, because the native
-            // method already stops scanning after first hit.
-            _pollTimer?.cancel();
-            _pollTimer = null;
           }
         } catch (e) {
-          log('discoverDeviceInfo (ble) error: $e');
+          log('smartBlePairing error: $e');
         }
-      });
+      } else {
+        // Fallback to polling discoverDeviceInfo (existing behavior for callers
+        // that don't have a homeId). Poll every 2s and stop after the first hit.
+        _pollTimer?.cancel();
+        _pollTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
+          if (!isScanning || bleDevice != null) return;
+          try {
+            final raw = await TuyaFlutterHaSdk.discoverDeviceInfo();
+            final found = _mapSingle(raw, fallbackType: 'ble');
+            if (found != null) {
+              bleDevice = found;
+              emit(OnboardingDevicesFound([bleDevice!], protocol: 'ble'));
+
+              _pollTimer?.cancel();
+              _pollTimer = null;
+            }
+          } catch (e) {
+            log('discoverDeviceInfo (ble) error: $e');
+          }
+        });
+      }
     } catch (e) {
       emit(OnboardingError(e.toString()));
       await _stopAll();

@@ -806,6 +806,24 @@ class TuyaFlutterHaSdk {
     return TuyaFlutterHaSdkPlatform.instance.discoverDeviceInfo();
   }
 
+  /// Performs a single-device smart BLE pairing flow (scan + pair) on the native side.
+  /// Returns the paired device info map on success, or null on timeout/failure.
+  static Future<Map<String, dynamic>?> smartBlePairing({
+    required int homeId,
+    int timeoutSeconds = 30,
+  }) {
+    if (homeId == 0) {
+      throw PlatformException(
+        code: "INVALID_PARAMETER",
+        message: "homeId should be specified",
+      );
+    }
+    return TuyaFlutterHaSdkPlatform.instance.smartBlePairing(
+      homeId: homeId,
+      timeoutSeconds: timeoutSeconds,
+    );
+  }
+
   /// Activate (pair) a pure-BLE device with the cloud.
   ///
   /// Example Usage:
