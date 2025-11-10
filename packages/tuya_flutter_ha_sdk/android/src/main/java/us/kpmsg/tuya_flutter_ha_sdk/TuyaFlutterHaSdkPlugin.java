@@ -864,6 +864,68 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                             }
                         });
                 break;
+            case "startComboPairing":
+
+                // returns device info from startActivator function of Tuya SDK
+                checkPermission();
+                stopAnyPairingOrScan();
+                MultiModeActivatorBean multiModeActivatorBean = new MultiModeActivatorBean();
+                multiModeActivatorBean.uuid = call.argument("uuid"); // The UUID of the device.
+                multiModeActivatorBean.ssid = call.argument("ssid"); // The SSID of the target Wi-Fi network.
+                multiModeActivatorBean.pwd = call.argument("password"); // The password of the target Wi-Fi network.
+                String cPairProductId = call.argument("productId");
+                Number cPairHomeId = call.argument("homeId");
+                if (cPairHomeId != null) multiModeActivatorBean.homeId = cPairHomeId.longValue(); // The value of `homeId` for the current home.
+
+                Number cPairTimeout = call.argument("timeout");
+                if (cPairTimeout != null && cPairTimeout.intValue() > 0) multiModeActivatorBean.timeout = cPairTimeout.intValue() * 1000; // The timeout value.
+
+                multiModeActivatorBean.token = call.argument("token"); // The pairing token.
+                Number cPairDeviceType = call.argument("deviceType");
+                if (cPairDeviceType != null) multiModeActivatorBean.deviceType = cPairDeviceType.intValue(); // The type of device.
+
+                String cPairAddress = call.argument("address");
+                if (cPairAddress != null) {
+                    multiModeActivatorBean.address = cPairAddress; // The IP address of the device.
+                    multiModeActivatorBean.mac = cPairAddress;
+                }
+                Number cPairDeviceFlag = call.argument("flag");
+                if (cPairDeviceFlag != null && cPairDeviceFlag.intValue() == 9) {
+                    result.error("BLE_UNPAIRABLE",
+                            "Beacon (flag 9) – pairing not supported", null);
+                    return;
+                }
+                mComboActivator = ThingHomeSdk.getActivator().newMultiModeActivator();
+                mComboActivator.startActivator(multiModeActivatorBean, new IMultiModeActivatorListener() {
+                    @Override
+                    public void onSuccess(DeviceBean deviceBean) {
+                        HashMap<String, Object> deviceDetails = new HashMap<>();
+                        deviceDetails.put("devId", deviceBean.getDevId());
+                        deviceDetails.put("name", deviceBean.getName());
+                        deviceDetails.put("productId", deviceBean.getProductId());
+                        deviceDetails.put("uuid", deviceBean.getUuid());
+                        deviceDetails.put("iconUrl", deviceBean.getIconUrl());
+                        deviceDetails.put("isOnline", deviceBean.getIsOnline());
+                        deviceDetails.put("isCloudOnline", deviceBean.isCloudOnline());
+                        deviceDetails.put("homeId", "not available");
+                        deviceDetails.put("roomId", "not available");
+                        deviceDetails.put("mac", deviceBean.getMac());
+                        deviceDetails.put("bleType", "Not available");
+                        deviceDetails.put("bleProtocolV", "Not available");
+                        deviceDetails.put("support5G", "Not available");
+                        deviceDetails.put("isProductKey", "Not available");
+                        deviceDetails.put("isSupportMutliUserShare", deviceBean.getIsShare());
+                        deviceDetails.put("isActive", "Not available");
+                        result.success(deviceDetails);
+                    }
+
+                    @Override
+                    public void onFailure(int code, String msg, Object handle) {
+                        result.error("COMBO_PAIR_FAILED", msg, "");
+                        stopAnyPairingOrScan();
+                    }
+                });
+            break;
             case "startConfigWiFi":
                 // returns the device info from Activator start function of Tuya SDK
                 String configSSID = call.argument("ssid");

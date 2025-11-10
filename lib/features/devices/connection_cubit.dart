@@ -151,7 +151,10 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
       if (homeId != null) {
         // Use native smart BLE pairing helper: scans once and pairs the device.
         try {
-          final raw = await TuyaFlutterHaSdk.smartBlePairing(homeId: homeId, timeoutSeconds: timeoutSeconds);
+          final raw = await TuyaFlutterHaSdk.smartBlePairing(
+            homeId: homeId,
+            timeoutSeconds: timeoutSeconds,
+          );
           final found = _mapSingle(raw, fallbackType: 'ble');
           if (found != null) {
             bleDevice = found;
@@ -196,6 +199,66 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
   // ─────────────────────────────────────────────────────────────────────────────
   /// Start automatic Wi-Fi + BLE combo pairing.
   /// This scans for combo devices and automatically pairs the first match.
+  /// Scan for BLE device, then pair using startComboPairing (manual combo pairing)
+  Future<void> startWifiComboPairing({
+    required int homeId,
+    required String ssid,
+    required String password,
+    int timeoutSeconds = 120,
+  }) async {
+    log('[Combo] Starting Wi-Fi + BLE combo pairing...');
+    emit(OnboardingScanning(secondsLeft: timeoutSeconds, protocol: 'combo'));
+    try {
+      log('[Combo] Scanning for BLE devices...');
+      final deviceInfo = await TuyaFlutterHaSdk.discoverDeviceInfo();
+      log('[Combo] BLE scan result: ' + (deviceInfo?.toString() ?? 'null'));
+      if (deviceInfo == null ||
+          deviceInfo['uuid'] == null ||
+          deviceInfo['productId'] == null) {
+        log('[Combo] No BLE device found for combo pairing.');
+        emit(OnboardingError('No BLE device found for combo pairing.'));
+        return;
+      }
+
+      log(
+        '[Combo] Found BLE device: uuid=${deviceInfo['uuid']}, productId=${deviceInfo['productId']}, address=${deviceInfo['address']}',
+      );
+      log('[Combo] Starting combo pairing with device...');
+      final token = await TuyaFlutterHaSdk.getToken(homeId: homeId);
+      final result = await TuyaFlutterHaSdk.startComboPairing(
+        homeId: homeId,
+        ssid: ssid,
+        password: password,
+        token: token,
+        uuid: deviceInfo['uuid'],
+        productId: deviceInfo['productId'],
+        address: deviceInfo['address'],
+        timeout: timeoutSeconds,
+      );
+      log('[Combo] Pairing result: ' + (result?.toString() ?? 'null'));
+
+      if (result != null && result['devId'] != null) {
+        log('[Combo] Pairing success! Device ID: ${result['devId']}');
+        emit(
+          OnboardingPairedSuccess(
+            DiscoveredDevice(
+              id: result['devId'],
+              name: result['name'] ?? 'Combo Device',
+              productId: result['productId'],
+              ip: null,
+            ),
+          ),
+        );
+      } else {
+        log('[Combo] Pairing failed or device not returned.');
+        emit(OnboardingError('Pairing failed or device not returned.'));
+      }
+    } catch (e, st) {
+      log('[Combo] Combo pairing error: $e\n$st');
+      emit(OnboardingError('Combo pairing error: $e'));
+    }
+  }
+
   Future<void> startWifiBleComboConfig({
     required int homeId,
     required String ssid,

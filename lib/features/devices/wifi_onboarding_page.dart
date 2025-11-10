@@ -182,15 +182,22 @@ class _WifiOnboardingPageState extends State<WifiOnboardingPage> {
                                   // Check mode and call appropriate method
                                   if (_mode == 'Combo') {
                                     // Use combo pairing
+
                                     await context
                                         .read<connection.ConnecitonCubit>()
-                                        .startWifiBleComboConfig(
+                                        .startWifiComboPairing(
                                           homeId: devicesCubit.currentHomeId!,
                                           ssid: ssid,
-                                          wifiPassword: pwd,
-                                          scanTimeoutSeconds: 30,
-                                          pairTimeoutSeconds: 120,
+                                          password: pwd,
+                                          timeoutSeconds: 120,
                                         );
+                                    // .startWifiBleComboConfig(
+                                    //   homeId: devicesCubit.currentHomeId!,
+                                    //   ssid: ssid,
+                                    //   wifiPassword: pwd,
+                                    //   scanTimeoutSeconds: 30,
+                                    //   pairTimeoutSeconds: 120,
+                                    // );
                                   } else {
                                     // Use regular Wi-Fi scan (EZ or AP mode)
                                     await context
