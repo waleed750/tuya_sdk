@@ -710,125 +710,119 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
                 });
                 break;
 
-            case "smartBlePairing":
-                // Performs a single-device BLE scan and then attempts to pair it (BLE activator).
-                checkPermission();
-                stopAnyPairingOrScan();
+          case "smartBlePairing":  // mirror Kotlin: SINGLE BLE scan -> startBleConfig
+  checkPermission();            // your runtime permission gate
+  stopAnyPairingOrScan();       // cleanup any previous flows
 
-        Number homeIdNum = call.argument("homeId");
-        Number timeoutSecNum = call.argument("timeoutSeconds");
-        final int scanTimeoutMsSmart = (timeoutSecNum != null && timeoutSecNum.intValue() > 0)
-            ? timeoutSecNum.intValue() * 1000 : 30_000;
+    Number homeIdNumBle = call.argument("homeId");
+    if (homeIdNumBle == null) {
+        result.error("MISSING_ARGS", "homeId is required", null);
+        break;
+    }
+    final long homeIdBle = homeIdNumBle.longValue();
 
-                if (homeIdNum == null) {
-                    result.error("MISSING_ARGS", "homeId is required", null);
-                    break;
+  // Optional: mimic the Kotlin check that BT is ON
+  if (!ThingHomeSdk.getBleOperator().isBluetoothOpened()) {
+    result.error("BT_OFF", "Please turn on Bluetooth", null);
+    break;
+  }
+
+  // match Kotlin: fixed 60s scan window + SINGLE
+    final int scanTimeoutMsBle = 60_000;
+
+  Map<String, Object> scanInfo = new HashMap<>();
+    scanInfo.put("homeId", homeIdBle);
+    scanInfo.put("timeoutMs", scanTimeoutMsBle);
+  emitEvent("ble.onScanStart", scanInfo);
+
+  mAutoPairingInProgress = true;
+
+  ThingHomeSdk.getBleOperator().startLeScan(
+      scanTimeoutMsBle,
+      ScanType.SINGLE,
+      bean -> {
+        if (!mAutoPairingInProgress || bean == null) return;
+
+        // Log candidate (same info you showed in Kotlin logs/UI)
+        HashMap<String, Object> candidate = new HashMap<>();
+        candidate.put("uuid", bean.getUuid());
+        candidate.put("name", bean.getName());
+        candidate.put("productId", bean.getProductId());
+        candidate.put("configType", bean.getConfigType());
+        candidate.put("mac", bean.getMac());
+        candidate.put("address", bean.getAddress());
+        emitEvent("ble.onCandidate", candidate);
+
+        // Proceed ONLY for pure BLE single devices (exactly like Kotlin)
+        if (bean.getConfigType() != com.thingclips.smart.android.ble.api.BleConfigType.CONFIG_TYPE_SINGLE.getType()) {
+          emitEvent("ble.onInfo", new HashMap<String, Object>() {{
+            put("message", "Found device but not compatible for single config");
+            put("uuid", bean.getUuid());
+            put("configType", bean.getConfigType());
+          }});
+          return; // keep listening until timeout; Kotlin just updates UI, we keep scanning
+        }
+
+        // Stop scan and start configuration
+        ThingHomeSdk.getBleOperator().stopLeScan();
+        emitEvent("ble.onPairStart", new HashMap<>(candidate));
+
+          ThingHomeSdk.getBleManager().startBleConfig(
+              homeIdBle,
+              bean.getUuid(),
+              null, // extra = null (same as Kotlin)
+              new com.thingclips.smart.android.ble.api.IThingBleConfigListener() {
+              @Override
+              public void onSuccess(com.thingclips.smart.sdk.bean.DeviceBean deviceBean) {
+                HashMap<String, Object> paired = new HashMap<>();
+                if (deviceBean != null) {
+                  paired.put("devId", deviceBean.getDevId());
+                  paired.put("name", deviceBean.getName());
+                  paired.put("productId", deviceBean.getProductId());
+                  paired.put("uuid", deviceBean.getUuid());
+                  paired.put("iconUrl", deviceBean.getIconUrl());
+                  paired.put("isOnline", deviceBean.getIsOnline());
+                  paired.put("isCloudOnline", deviceBean.isCloudOnline());
+                  paired.put("mac", deviceBean.getMac());
+                  paired.put("dps", deviceBean.getDps());
                 }
+                emitEvent("ble.onSuccess", paired);
+                result.success(paired);
+                stopAnyPairingOrScan();
+              }
 
-                final int targetHomeId = homeIdNum.intValue();
+              @Override
+              public void onFail(String code, String msg, Object handle) {
+                Map<String, Object> err = new HashMap<>();
+                err.put("errorCode", code);
+                err.put("errorMessage", msg);
+                emitEvent("ble.onError", err);
+                result.error("BLE_PAIR_FAILED", msg, code);
+                stopAnyPairingOrScan();
+              }
+            }
+        );
+      }
+  );
 
-                // notify scan start
-                Map<String, Object> scanInfo = new HashMap<>();
-                scanInfo.put("homeId", targetHomeId);
-                emitEvent("ble.onScanStart", scanInfo);
+  // Timeout guard: if no compatible device triggered config
+    activity.getWindow().getDecorView().postDelayed(() -> {
+        if (!mAutoPairingInProgress) return;
+        ThingHomeSdk.getBleOperator().stopLeScan();
+        mAutoPairingInProgress = false;
+        Map<String, Object> done = new HashMap<>();
+        done.put("message", "Scan window ended");
+        emitEvent("ble.onScanComplete", done);
 
-        LeScanSetting scanSetting2 = new LeScanSetting.Builder()
-            .setTimeout(scanTimeoutMsSmart)
-                        .addScanType(ScanType.SINGLE)
-                        .build();
+        // If activation didn’t start, return a timeout to Dart
+        result.error("SCAN_TIMEOUT", "No single-BLE device configured within 60s", null);
+        stopAnyPairingOrScan();
+    }, scanTimeoutMsBle);
 
-                mAutoPairingInProgress = true;
+  break;
 
-                ThingHomeSdk.getBleOperator().startLeScan(scanSetting2, new BleScanResponse() {
-                    @Override
-                    public void onResult(ScanDeviceBean bean) {
-                        if (!mAutoPairingInProgress) return;
 
-                        HashMap<String, Object> deviceDetails = new HashMap<>();
-                        deviceDetails.put("name", bean.getName());
-                        deviceDetails.put("productId", bean.getProductId());
-                        deviceDetails.put("uuid", bean.getUuid());
-                        deviceDetails.put("mac", bean.getMac());
-                        deviceDetails.put("address", bean.getAddress());
-                        deviceDetails.put("flag", bean.getFlag());
-                        deviceDetails.put("deviceType", bean.getDeviceType());
-                        deviceDetails.put("configType", bean.getConfigType());
 
-                        emitEvent("ble.onCandidate", new HashMap<>(deviceDetails));
-
-                        // If beacon/unpairable, abort
-                        if (bean.getFlag() == 9) {
-                            Map<String, Object> err = new HashMap<>();
-                            err.put("errorCode", "BLE_UNPAIRABLE");
-                            err.put("errorMessage", "Beacon (flag 9) – pairing not supported");
-                            emitEvent("ble.onError", err);
-                            result.error("BLE_UNPAIRABLE", "Beacon (flag 9) – pairing not supported", null);
-                            stopAnyPairingOrScan();
-                            return;
-                        }
-
-                        // Stop scanning and start BLE activator
-                        ThingHomeSdk.getBleOperator().stopLeScan();
-
-                        BleActivatorBean bleBean = new BleActivatorBean();
-                        bleBean.uuid = bean.getUuid();
-                        bleBean.productId = bean.getProductId();
-                        bleBean.homeId = targetHomeId;
-                        bleBean.address = bean.getAddress();
-                        // Some SDK versions don't expose a `mac` field on BleActivatorBean.
-                        // Use address (or set mac only if available). Avoid compiling error by
-                        // not assigning to bleBean.mac unconditionally.
-                        bleBean.deviceType = bean.getDeviceType();
-                        bleBean.timeout = 60_000; // default pair timeout
-
-                        mBleActivator = ThingHomeSdk.getActivator().newBleActivator();
-                        emitEvent("ble.onPairStart", new HashMap<>(deviceDetails));
-                        mBleActivator.startActivator(bleBean, new IBleActivatorListener() {
-                            @Override
-                            public void onSuccess(DeviceBean deviceBean) {
-                                HashMap<String, Object> paired = new HashMap<>();
-                                paired.put("devId", deviceBean.getDevId());
-                                paired.put("name", deviceBean.getName());
-                                paired.put("productId", deviceBean.getProductId());
-                                paired.put("uuid", deviceBean.getUuid());
-                                paired.put("iconUrl", deviceBean.getIconUrl());
-                                paired.put("isOnline", deviceBean.getIsOnline());
-                                paired.put("isCloudOnline", deviceBean.isCloudOnline());
-                                paired.put("mac", deviceBean.getMac());
-                                paired.put("dps", deviceBean.getDps());
-
-                                emitEvent("ble.onSuccess", new HashMap<>(paired));
-                                result.success(paired);
-                                stopAnyPairingOrScan();
-                            }
-
-                            @Override
-                            public void onFailure(int code, String msg, Object handle) {
-                                Map<String, Object> err = new HashMap<>();
-                                err.put("errorCode", code);
-                                err.put("errorMessage", msg);
-                                emitEvent("ble.onError", err);
-                                result.error("BLE_PAIR_FAILED", msg, code);
-                                stopAnyPairingOrScan();
-                            }
-                        });
-                    }
-                });
-
-                activity.getWindow().getDecorView().postDelayed(() -> {
-                    if (!mAutoPairingInProgress) return;
-                    ThingHomeSdk.getBleOperator().stopLeScan();
-                    if (mBleActivator == null) {
-                        Map<String, Object> err = new HashMap<>();
-                        err.put("errorCode", "SCAN_TIMEOUT");
-                        err.put("errorMessage", "No device found within scan timeout");
-                        emitEvent("ble.onError", err);
-                        result.error("SCAN_TIMEOUT", "No device found", null);
-                        stopAnyPairingOrScan();
-                    }
-                }, scanTimeoutMsSmart);
-
-                break;
             case "getSSID":
                 // Uses the WifiManager to return the ssid
                 WifiManager wifiManager = (WifiManager) appContext.getSystemService(Context.WIFI_SERVICE);
@@ -1099,10 +1093,10 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
     mAutoPairingInProgress = true;
 
     final long homeIdCombo = homeIdNumCombo.longValue();
-    final int scanTimeoutMs = (scanTimeoutMsNum != null && scanTimeoutMsNum.intValue() > 0)
-            ? scanTimeoutMsNum.intValue() : 60_000;
-    final int pairTimeoutMs = (pairTimeoutSecNum != null && pairTimeoutSecNum.intValue() > 0)
-            ? pairTimeoutSecNum.intValue() * 1000 : 120_000;
+    final int scanTimeoutMsCombo = (scanTimeoutMsNum != null && scanTimeoutMsNum.intValue() > 0)
+        ? scanTimeoutMsNum.intValue() : 60_000;
+    final int pairTimeoutMsCombo = (pairTimeoutSecNum != null && pairTimeoutSecNum.intValue() > 0)
+        ? pairTimeoutSecNum.intValue() * 1000 : 120_000;
 
     Map<String, Object> scanStart = new HashMap<>();
     scanStart.put("ssid", ssid);
@@ -1112,12 +1106,12 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
     emitEvent("auto.onScanStart", scanStart);
 
     // Scan (your SDK only supports SINGLE here)
-    LeScanSetting setting = new LeScanSetting.Builder()
-            .setTimeout(scanTimeoutMs)
-            .addScanType(ScanType.SINGLE)
-            .build();
+    LeScanSetting settingCombo = new LeScanSetting.Builder()
+        .setTimeout(scanTimeoutMsCombo)
+        .addScanType(ScanType.SINGLE)
+        .build();
 
-    ThingHomeSdk.getBleOperator().startLeScan(setting, new BleScanResponse() {
+    ThingHomeSdk.getBleOperator().startLeScan(settingCombo, new BleScanResponse() {
         @Override
         public void onResult(ScanDeviceBean bean) {
             if (!mAutoPairingInProgress) return;
@@ -1155,7 +1149,7 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
             mm.address = bean.getAddress();
             mm.mac = bean.getMac();
             mm.deviceType = bean.getDeviceType();
-            mm.timeout = pairTimeoutMs;
+            mm.timeout = pairTimeoutMsCombo;
 
             mComboActivatorUuid = bean.getUuid();
 
@@ -1236,7 +1230,7 @@ public class TuyaFlutterHaSdkPlugin implements FlutterPlugin, MethodChannel.Meth
             result.error("SCAN_TIMEOUT", "No device found", null);
             stopAnyPairingOrScan();
         }
-    }, scanTimeoutMs);
+    }, scanTimeoutMsCombo);
 
     break;
 

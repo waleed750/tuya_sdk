@@ -37,7 +37,9 @@ class _WifiOnboardingPageState extends State<WifiOnboardingPage> {
 
   @override
   void dispose() {
-    context.read<connection.ConnecitonCubit>().stopWifiScan();
+    if (!context.read<connection.ConnecitonCubit>().isClosed) {
+      context.read<connection.ConnecitonCubit>().stopWifiScan();
+    }
     _wifiSSIDController.dispose();
     _wifiPasswordController.dispose();
     super.dispose();
@@ -256,28 +258,26 @@ class _WifiOnboardingPageState extends State<WifiOnboardingPage> {
                       final d = context
                           .read<connection.ConnecitonCubit>()
                           .device;
-                      return Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const LinearProgressIndicator(),
-                            const SizedBox(height: 8),
-                            Text('Pairing… ${state.secondsLeft}s left'),
-                            const SizedBox(height: 8),
-                            // If your cubit surfaces a device during AP/EZ, allow tap-to-pair immediately.
-                            Expanded(
-                              child: DeviceDiscoveryList(
-                                devices: d == null ? const [] : [d],
-                                // ⬇️ immediate pair on tap (no confirmation)
-                                onPair: (DiscoveredDevice dev) async {
-                                  await context
-                                      .read<connection.ConnecitonCubit>()
-                                      .pairSelected(dev);
-                                },
-                              ),
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const LinearProgressIndicator(),
+                          const SizedBox(height: 8),
+                          Text('Pairing… ${state.secondsLeft}s left'),
+                          const SizedBox(height: 8),
+                          // If your cubit surfaces a device during AP/EZ, allow tap-to-pair immediately.
+                          Expanded(
+                            child: DeviceDiscoveryList(
+                              devices: d == null ? const [] : [d],
+                              // ⬇️ immediate pair on tap (no confirmation)
+                              onPair: (DiscoveredDevice dev) async {
+                                await context
+                                    .read<connection.ConnecitonCubit>()
+                                    .pairSelected(dev);
+                              },
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       );
                     }
 
@@ -296,11 +296,9 @@ class _WifiOnboardingPageState extends State<WifiOnboardingPage> {
                       );
                     }
 
-                    return const Expanded(
-                      child: Center(
-                        child: Text(
-                          'No scan active. Configure above and start scanning.',
-                        ),
+                    return Center(
+                      child: Text(
+                        'No scan active. Configure above and start scanning.',
                       ),
                     );
                   },

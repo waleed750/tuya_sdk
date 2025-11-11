@@ -432,6 +432,12 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
     );
   }
 
+  /// Stop any ongoing pairing/scan happening on the native side.
+  @override
+  Future<void> stopAnyPairingOrScan() async {
+    await methodChannel.invokeMethod<void>('stopAnyPairingOrScan');
+  }
+
   /// Performs a single-device smart BLE pairing flow on the native side.
   /// Returns the paired device info map on success, or null on timeout/failure.
   @override
@@ -440,10 +446,10 @@ class MethodChannelTuyaFlutterHaSdk extends TuyaFlutterHaSdkPlatform {
     int timeoutSeconds = 30,
   }) async {
     final Map<dynamic, dynamic>? result = await methodChannel
-        .invokeMethod<Map<dynamic, dynamic>>('smartBlePairing', <String, dynamic>{
-      'homeId': homeId,
-      'timeoutSeconds': timeoutSeconds,
-    });
+        .invokeMethod<Map<dynamic, dynamic>>(
+          'smartBlePairing',
+          <String, dynamic>{'homeId': homeId, 'timeoutSeconds': timeoutSeconds},
+        );
     return result == null ? null : Map<String, dynamic>.from(result);
   }
 

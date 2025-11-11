@@ -806,6 +806,13 @@ class TuyaFlutterHaSdk {
     return TuyaFlutterHaSdkPlatform.instance.discoverDeviceInfo();
   }
 
+  /// Stops any ongoing pairing/scan on the native side.
+  /// Use this to ensure native BLE/Wi-Fi activators are halted when leaving
+  /// a pairing screen or on errors.
+  static Future<void> stopAnyPairingOrScan() {
+    return TuyaFlutterHaSdkPlatform.instance.stopAnyPairingOrScan();
+  }
+
   /// Performs a single-device smart BLE pairing flow (scan + pair) on the native side.
   /// Returns the paired device info map on success, or null on timeout/failure.
   static Future<Map<String, dynamic>?> smartBlePairing({

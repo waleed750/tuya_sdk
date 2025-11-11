@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:tuya_flutter_ha_sdk/tuya_flutter_ha_sdk.dart';
 
 import 'data/model/discover_device_model.dart';
+import '../../services/bluetooth_utils.dart';
 
 part 'connection_state.dart';
 
@@ -141,6 +142,13 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
   // ─────────────────────────────────────────────────────────────────────────────
   Future<void> startBleScan({int timeoutSeconds = 30, int? homeId}) async {
     try {
+      final isBluetoothAvailable = await ensureBluetoothReady();
+      if (!isBluetoothAvailable) {
+        emit(
+          OnboardingError('Bluetooth or Location services are not enabled.'),
+        );
+        return;
+      }
       if (isScanning) await _stopAll();
       isScanning = true;
       bleDevice = null;
@@ -206,12 +214,20 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
     required String password,
     int timeoutSeconds = 120,
   }) async {
+    final isBluetoothAvailable = await ensureBluetoothReady();
+    if (!isBluetoothAvailable) {
+      emit(OnboardingError('Bluetooth or Location services are not enabled.'));
+      return;
+    }
+    if (isScanning) await _stopAll();
+    isScanning = true;
+    _startCountdown(timeoutSeconds, 'combo');
     log('[Combo] Starting Wi-Fi + BLE combo pairing...');
     emit(OnboardingScanning(secondsLeft: timeoutSeconds, protocol: 'combo'));
     try {
       log('[Combo] Scanning for BLE devices...');
       final deviceInfo = await TuyaFlutterHaSdk.discoverDeviceInfo();
-      log('[Combo] BLE scan result: ' + (deviceInfo?.toString() ?? 'null'));
+      log('[Combo] BLE scan result: ${deviceInfo?.toString() ?? 'null'}');
       if (deviceInfo == null ||
           deviceInfo['uuid'] == null ||
           deviceInfo['productId'] == null) {
@@ -235,8 +251,8 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
         address: deviceInfo['address'],
         timeout: timeoutSeconds,
       );
-      log('[Combo] Pairing result: ' + (result?.toString() ?? 'null'));
-
+      log('[Combo] Pairing result: ${result?.toString() ?? 'null'}');
+      isScanning = false;
       if (result != null && result['devId'] != null) {
         log('[Combo] Pairing success! Device ID: ${result['devId']}');
         emit(
@@ -253,8 +269,11 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
         log('[Combo] Pairing failed or device not returned.');
         emit(OnboardingError('Pairing failed or device not returned.'));
       }
+      await _stopAll();
     } catch (e, st) {
+      isScanning = false;
       log('[Combo] Combo pairing error: $e\n$st');
+      await _stopAll();
       emit(OnboardingError('Combo pairing error: $e'));
     }
   }
@@ -269,6 +288,14 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
     int pairTimeoutSeconds = 120,
   }) async {
     try {
+      final isBluetoothAvailable = await ensureBluetoothReady();
+      if (!isBluetoothAvailable) {
+        emit(
+          OnboardingError('Bluetooth or Location services are not enabled.'),
+        );
+        return;
+      }
+
       if (isScanning) await _stopAll();
       isScanning = true;
 
@@ -397,6 +424,7 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
         'Unsupported device type for pairing: ${selected.deviceType}',
       );
     } catch (e) {
+      await _stopAll();
       emit(OnboardingError(e.toString()));
     }
   }
@@ -408,7 +436,7 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
     try {
       if (devId.isEmpty) throw Exception('devId is required');
       await TuyaFlutterHaSdk.removeDevice(devId: devId);
-      emit(OnboardingIdle());
+      // emit(OnboardingIdle());
     } catch (e) {
       emit(OnboardingError(e.toString()));
     }
@@ -427,6 +455,11 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
     // Safe to call even if Wi-Fi activator isn’t running.
     try {
       await TuyaFlutterHaSdk.stopConfigWiFi();
+    } catch (_) {}
+
+    // Ensure any native BLE/Wi‑Fi activators are also stopped.
+    try {
+      await TuyaFlutterHaSdk.stopAnyPairingOrScan();
     } catch (_) {}
 
     emit(OnboardingIdle());
@@ -489,7 +522,11 @@ class ConnecitonCubit extends Cubit<ConnectionState> {
     return DiscoveredDevice.fromMap(m);
   }
 
-  @override
+  /// Checks Bluetooth permissions and adapter state before BLE operations
+  Future<bool> ensureBluetoothReady() async {
+    return await BluetoothUtils.ensureBluetoothReady();
+  }
+
   @override
   Future<void> close() {
     _pairingSub?.cancel();

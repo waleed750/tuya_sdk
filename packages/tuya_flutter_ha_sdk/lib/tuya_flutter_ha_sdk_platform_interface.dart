@@ -197,6 +197,10 @@ abstract class TuyaFlutterHaSdkPlatform extends PlatformInterface {
   /// Returns its raw JSON map, or null if none found.
   Future<Map<String, dynamic>?> discoverDeviceInfo();
 
+  /// Stops any ongoing scans or pairing activators on the native side.
+  /// This is a force-stop that ensures no native BLE/Wi-Fi activators are running.
+  Future<void> stopAnyPairingOrScan();
+
   /// Native helper that performs a full "smart" BLE pairing flow:
   /// 1) Scans for a single compatible BLE device
   /// 2) If found, starts BLE configuration (activation) using the SDK

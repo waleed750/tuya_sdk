@@ -179,11 +179,40 @@ class _DevicesPageState extends State<DevicesPage> {
                                     ) ??
                                     false;
                               },
-                              onDismissed: (direction) {
-                                // TODO: Call cubit/device delete method here
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Smart lock deleted')),
+                              onDismissed: (direction) async {
+                                final devId = device["devId"] ?? device["id"];
+                                final devicesCubit = context
+                                    .read<DevicesCubit>();
+                                final isConfirmed = await showDialog<bool>(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: Text('Delete Device'),
+                                    content: Text(
+                                      'Are you sure you want to delete this device?',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(ctx).pop(false),
+                                        child: Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(ctx).pop(true),
+                                        child: Text(
+                                          'Delete',
+                                          style: TextStyle(color: Colors.red),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 );
+                                if (isConfirmed == true) {
+                                  await devicesCubit.deleteDevice(devId: devId);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Device deleted')),
+                                  );
+                                }
                               },
                               child: DeviceListTile(
                                 device: device,

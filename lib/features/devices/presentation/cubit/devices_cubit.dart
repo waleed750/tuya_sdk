@@ -121,6 +121,17 @@ class DevicesCubit extends Cubit<DevicesState> {
     emit(SSIDLoaded());
   }
 
+  Future<void> deleteDevice({required String devId}) async {
+    try {
+      if (devId.isEmpty) throw Exception('devId is required');
+      await TuyaFlutterHaSdk.removeDevice(devId: devId);
+      // emit(OnboardingIdle());
+      await loadDevices(); // Refresh device list after deletion
+    } catch (e) {
+      emit(DevicesError(message: e.toString()));
+    }
+  }
+
   Future<void> addNewHome({
     required String name,
     required String address,
