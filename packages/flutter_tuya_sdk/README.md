@@ -1,16 +1,16 @@
-![Flutter](assets/readme/flutter_logo.png) ![Tuya](assets/readme/tuya_logo.png)
+<img src="assets/readme/flutter_logo.png" width="40" alt="Flutter"> <img src="assets/readme/tuya_logo.png" width="60" alt="Tuya">
 
-# flutter_tuya_sdk — Tuya Flutter Plugin (iOS & Android)
+# flutter_tuya_sdk
 
 [![pub package](https://img.shields.io/pub/v/flutter_tuya_sdk.svg)](https://pub.dev/packages/flutter_tuya_sdk)
 
-This comprehensive guide will assist you in quickly setting up and utilizing the `flutter_tuya_sdk` Flutter plugin (a Tuya Home Automation wrapper for iOS & Android) within your Flutter application.
+A Flutter plugin I built to bridge Tuya's native ThingSmart SDKs (iOS & Android) into Dart — one API for user accounts, homes, device pairing, control, locks, and cameras, instead of hand-rolling platform channels yourself.
 
-## What this package does
+## What it does
 
-`flutter_tuya_sdk` wraps Tuya's native ThingSmart SDKs for Android and iOS behind a single Dart API (`FlutterTuyaSdk`), using method channels and one event channel for real-time device/pairing events. It does not reimplement Tuya's cloud APIs — it's a thin bridge to Tuya's own SDKs, so it requires a Tuya IoT Platform account and app registration (see [Prerequisites](#prerequisites) below).
+`flutter_tuya_sdk` wraps Tuya's native SDKs behind a single Dart API (`FlutterTuyaSdk`), using method channels plus one event channel for real-time device/pairing events. It's a thin bridge, not a reimplementation of Tuya's cloud APIs — you'll still need a Tuya IoT Platform account and a registered app (see [Prerequisites](#prerequisites)).
 
-Covered functionality:
+What's covered:
 
 - **User management** — login/register (UID or email), session check, profile, logout, account deletion.
 - **Home & room management** — create/list/update/delete homes, rooms, and their devices.
@@ -1241,14 +1241,14 @@ try {
 
 ## 📬 Contact Us
 
-Maintained by **Waleed Ashraf**.
+Built and maintained by **Waleed Ashraf**. Found a bug, missing a method, or want to say hi?
 
-- 🐛 Report an issue or request a feature: [GitHub Issues](https://github.com/waleed750/flutter_tuya_sdk/issues)
-- 📦 A runnable example is included with the package at [`example/`](example/).
+- 🐛 [Open an issue](https://github.com/waleed750/flutter_tuya_sdk/issues) — bugs, feature requests, questions.
+- 📦 Check [`example/`](example/) first — most things you'd want to build are already demoed there.
 
 #### Connect
-[![GitHub Profile](https://cdn-icons-png.flaticon.com/128/733/733553.png)](https://github.com/waleed750)
-[![LinkedIn Profile](https://cdn-icons-png.flaticon.com/128/3536/3536505.png)](https://www.linkedin.com/in/waleed-ashrf/)
+[<img src="https://cdn-icons-png.flaticon.com/128/733/733553.png" width="20" alt="GitHub">](https://github.com/waleed750)&nbsp;
+[<img src="https://cdn-icons-png.flaticon.com/128/3536/3536505.png" width="20" alt="LinkedIn">](https://www.linkedin.com/in/waleed-ashrf/)
 
 ---
 

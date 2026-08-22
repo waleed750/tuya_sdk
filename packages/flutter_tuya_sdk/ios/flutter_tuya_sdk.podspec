@@ -12,7 +12,8 @@ This plugin exposes Tuya’s user‒ and device‒management SDKs via MethodChan
                        DESC
   s.homepage         = 'https://github.com/waleed750/flutter_tuya_sdk'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Waleed Ashraf' => 'waleed@example.com' }
+  s.author           = { 'Waleed Ashraf' => 'eng.waleed.ashraf.farag@gmail.com' }
+  s.social_media_url = 'https://github.com/waleed750'
   s.source           = { :path => '.' }
 
   # Source files for the plugin‐level Swift classes:
