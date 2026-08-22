@@ -1,7 +1,4 @@
-<!-- TODO: add Flutter and Tuya logos to assets/readme/, see brand guidelines -->
-<!-- For example, once you have `assets/readme/flutter_logo.png` and `assets/readme/tuya_logo.png` (sourced under their respective brand/press usage terms), reference them here with relative links:
 ![Flutter](assets/readme/flutter_logo.png) ![Tuya](assets/readme/tuya_logo.png)
--->
 
 # flutter_tuya_sdk — Tuya Flutter Plugin (iOS & Android)
 
