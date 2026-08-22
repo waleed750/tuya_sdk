@@ -130,6 +130,17 @@ own, add a proper `example/`, and satisfy pub.dev publishing rules.
   `1.0.0` — decide during planning) instead of the current placeholder.
 - `README.md`: keep the detailed API guide but ensure it renders
   cleanly on pub.dev (heading structure, no broken relative links).
+  Add a **Prerequisites** section near the top (before installation
+  steps) listing what a consumer must have/obtain before this package
+  will work: a Tuya IoT Platform developer account and app registered
+  there (App Key/Secret), the downloaded Tuya iOS SDK bundle
+  (`ios_core_sdk` + `Podfile` snippet, per existing install steps),
+  minimum Flutter/Dart SDK version and minimum Android
+  `minSdkVersion`/iOS deployment target this package requires, and
+  that Tuya's own Maven/CocoaPods sources must be reachable (network
+  access to `TuyaPublicSpecs`/`tuya-pod-specs`/Tuya Maven repo). This
+  makes explicit that the plugin is a thin wrapper and does not work
+  standalone without a configured Tuya account/app.
 - Ensure public API has doc comments where missing (pub.dev scores
   this).
 - Run `flutter pub publish --dry-run` inside the package and resolve
