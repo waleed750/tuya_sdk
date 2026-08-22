@@ -1248,7 +1248,8 @@ Built and maintained by **Waleed Ashraf**. Found a bug, missing a method, or wan
 
 #### Connect
 [<img src="https://cdn-icons-png.flaticon.com/128/733/733553.png" width="20" alt="GitHub">](https://github.com/waleed750)&nbsp;
-[<img src="https://cdn-icons-png.flaticon.com/128/3536/3536505.png" width="20" alt="LinkedIn">](https://www.linkedin.com/in/waleed-ashrf/)
+[<img src="https://cdn-icons-png.flaticon.com/128/3536/3536505.png" width="20" alt="LinkedIn">](https://www.linkedin.com/in/waleed-ashrf/)&nbsp;
+[<img src="https://cdn-icons-png.flaticon.com/128/5968/5968906.png" width="20" alt="Medium">](https://medium.com/@waleed__ashraf)
 
 ---
 
