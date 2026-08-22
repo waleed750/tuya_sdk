@@ -1246,6 +1246,10 @@ Maintained by **Waleed Ashraf**.
 - 🐛 Report an issue or request a feature: [GitHub Issues](https://github.com/waleed750/flutter_tuya_sdk/issues)
 - 📦 A runnable example is included with the package at [`example/`](example/).
 
+#### Connect
+[![GitHub Profile](https://cdn-icons-png.flaticon.com/128/733/733553.png)](https://github.com/waleed750)
+[![LinkedIn Profile](https://cdn-icons-png.flaticon.com/128/3536/3536505.png)](https://www.linkedin.com/in/waleed-ashrf/)
+
 ---
 
 ## 📜 License
