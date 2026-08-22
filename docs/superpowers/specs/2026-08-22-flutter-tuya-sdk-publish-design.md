@@ -141,6 +141,19 @@ own, add a proper `example/`, and satisfy pub.dev publishing rules.
   access to `TuyaPublicSpecs`/`tuya-pod-specs`/Tuya Maven repo). This
   makes explicit that the plugin is a thin wrapper and does not work
   standalone without a configured Tuya account/app.
+- At the top of `README.md` (title/header area), add a Flutter icon
+  and a Tuya icon alongside the package title/badges, so the README
+  visually signals "Flutter package that integrates Tuya" at a glance
+  on pub.dev and GitHub. Use official/public brand assets (Flutter's
+  logo from flutter.dev's press/brand assets, Tuya's logo from Tuya's
+  official brand/press resources) rather than redrawing them; host
+  them as small images under something like
+  `packages/flutter_tuya_sdk/assets/readme/` and reference via
+  relative markdown image links (pub.dev renders README images from
+  the package's own repo/assets, not arbitrary hotlinks). Verify each
+  logo's usage terms permit this kind of attribution use before
+  including it — flag for your confirmation during implementation
+  rather than assuming blanket permission.
 - Ensure public API has doc comments where missing (pub.dev scores
   this).
 - Run `flutter pub publish --dry-run` inside the package and resolve
