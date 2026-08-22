@@ -5,8 +5,8 @@ import 'package:equatable/equatable.dart';
 import 'package:example/core/cache/app_prefs.dart';
 import 'package:example/features/auth/data/user_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tuya_flutter_ha_sdk/models/user_model.dart';
-import 'package:tuya_flutter_ha_sdk/tuya_flutter_ha_sdk_platform_interface.dart';
+import 'package:flutter_tuya_sdk/models/user_model.dart';
+import 'package:flutter_tuya_sdk/flutter_tuya_sdk_platform_interface.dart';
 
 part 'auth_state.dart';
 
@@ -34,7 +34,7 @@ class AuthCubit extends Cubit<AuthState> {
     final userData = await secureStorage.getUserData();
     if (userData != null) {
       user = TuyaUserModel.fromMap(userData);
-      final resultInfo = await TuyaFlutterHaSdkPlatform.instance
+      final resultInfo = await FlutterTuyaSdkPlatform.instance
           .getCurrentUser();
       if (resultInfo.isNotEmpty) {
         thingSmartUserModel = ThingSmartUserModel.fromJson(resultInfo);
@@ -67,7 +67,7 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> login(String email, String password) async {
     emit(const AuthLoading(message: 'Logging in...'));
     try {
-      final result = await TuyaFlutterHaSdkPlatform.instance.loginWithEmail(
+      final result = await FlutterTuyaSdkPlatform.instance.loginWithEmail(
         countryCode: '+1',
         email: email,
         password: password,
@@ -75,7 +75,7 @@ class AuthCubit extends Cubit<AuthState> {
       );
       if (result.containsKey('uid')) {
         user = TuyaUserModel.fromMap(result);
-        final resultInfo = await TuyaFlutterHaSdkPlatform.instance
+        final resultInfo = await FlutterTuyaSdkPlatform.instance
             .getCurrentUser();
         if (resultInfo.isNotEmpty) {
           thingSmartUserModel = ThingSmartUserModel.fromJson(resultInfo);
@@ -100,7 +100,7 @@ class AuthCubit extends Cubit<AuthState> {
       // 1: register an account with an email address
       // 2: login to the app with an email address
       // 3: reset the password of an account that is registered with an email address
-      await TuyaFlutterHaSdkPlatform.instance.sendVerificationCode(
+      await FlutterTuyaSdkPlatform.instance.sendVerificationCode(
         countryCode: '1',
         account: email,
         accountType: 'email',
@@ -159,7 +159,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
 
     // Call platform to resend verification code
-    await TuyaFlutterHaSdkPlatform.instance.sendVerificationCode(
+    await FlutterTuyaSdkPlatform.instance.sendVerificationCode(
       countryCode: '+1',
       account: email,
       accountType: '1',
@@ -172,7 +172,7 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> _checkVerification(String email) async {
     try {
       // call an API to check if user verified - placeholder: getCurrentUser
-      final resultInfo = await TuyaFlutterHaSdkPlatform.instance
+      final resultInfo = await FlutterTuyaSdkPlatform.instance
           .getCurrentUser();
       if (resultInfo.isNotEmpty) {
         // Verified
@@ -208,7 +208,7 @@ class AuthCubit extends Cubit<AuthState> {
   }) async {
     emit(const AuthLoading(message: 'Registering...'));
     try {
-      final result = await TuyaFlutterHaSdkPlatform.instance
+      final result = await FlutterTuyaSdkPlatform.instance
           .registerAccountWithEmail(
             countryCode: '+1',
             email: email,

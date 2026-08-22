@@ -6,7 +6,7 @@ import 'package:example/features/devices/presentation/widgets/add_home_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tuya_flutter_ha_sdk/models/thing_smart_home_model.dart';
+import 'package:flutter_tuya_sdk/models/thing_smart_home_model.dart';
 
 import '../widgets/site_map_widget.dart';
 

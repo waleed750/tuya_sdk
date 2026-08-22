@@ -1,0 +1,64 @@
+import 'package:flutter_tuya_sdk_example/core/cache/app_prefs.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_tuya_sdk/flutter_tuya_sdk.dart';
+
+import 'app_bloc_observer.dart';
+import 'core/router.dart';
+import 'core/theme.dart';
+import 'features/auth/presentation/cubit/auth_cubit.dart';
+import 'features/devices/presentation/cubit/devices_cubit.dart';
+import 'features/devices/connection_cubit.dart';
+import 'tuya_configuration.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  Bloc.observer = AppBlocObserver();
+  // Initialize Tuya SDK - replace placeholders in tuya_configuration.dart
+  try {
+    await FlutterTuyaSdk.tuyaSdkInit(
+      androidKey: TuyaConfig.androidAppKey,
+      androidSecret: TuyaConfig.androidAppSecret,
+      iosKey: TuyaConfig.iosAppKey,
+      iosSecret: TuyaConfig.iosAppSecret,
+      isDebug: true,
+    );
+    debugPrint('Tuya SDK initialization succeeded');
+  } catch (e, stack) {
+    debugPrint('Tuya SDK initialization failed: $e');
+    debugPrint(stack.toString());
+  }
+  AppPreferences().init();
+
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => AuthCubit()..automateLogin()),
+        BlocProvider(create: (context) => DevicesCubit()..getCurrentSSID()),
+        BlocProvider(create: (context) => ConnecitonCubit()),
+      ],
+      child: Builder(
+        builder: (context) {
+          return GlobalLoaderOverlay(
+            child: MaterialApp.router(
+              title: 'flutter_tuya_sdk example',
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: ThemeMode.system,
+              routerConfig: appRouter.router,
+              debugShowCheckedModeBanner: false,
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

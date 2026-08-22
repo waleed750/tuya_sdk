@@ -1,2 +1,0 @@
-int id camera_video_view 0x0
-int layout camera_video_view 0x0

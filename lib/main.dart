@@ -1,7 +1,7 @@
 import 'package:example/core/cache/app_prefs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tuya_flutter_ha_sdk/tuya_flutter_ha_sdk.dart';
+import 'package:flutter_tuya_sdk/flutter_tuya_sdk.dart';
 
 import 'app_bloc_observer.dart';
 import 'core/router.dart';
@@ -17,7 +17,7 @@ Future<void> main() async {
   Bloc.observer = AppBlocObserver();
   // Initialize Tuya SDK
   try {
-    await TuyaFlutterHaSdk.tuyaSdkInit(
+    await FlutterTuyaSdk.tuyaSdkInit(
       androidKey: TuyaConfig.androidAppKey,
       androidSecret: TuyaConfig.androidAppSecret,
       iosKey: TuyaConfig.iosAppKey,
