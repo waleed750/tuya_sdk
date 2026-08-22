@@ -6,6 +6,21 @@
 
 This comprehensive guide will assist you in quickly setting up and utilizing the `flutter_tuya_sdk` Flutter plugin (a Tuya Home Automation wrapper for iOS & Android) within your Flutter application.
 
+## What this package does
+
+`flutter_tuya_sdk` wraps Tuya's native ThingSmart SDKs for Android and iOS behind a single Dart API (`FlutterTuyaSdk`), using method channels and one event channel for real-time device/pairing events. It does not reimplement Tuya's cloud APIs — it's a thin bridge to Tuya's own SDKs, so it requires a Tuya IoT Platform account and app registration (see [Prerequisites](#prerequisites) below).
+
+Covered functionality:
+
+- **User management** — login/register (UID or email), session check, profile, logout, account deletion.
+- **Home & room management** — create/list/update/delete homes, rooms, and their devices.
+- **Device pairing** — Wi-Fi (EZ/AP), BLE, and combined Wi-Fi+BLE pairing, both manual and fully automatic flows.
+- **Device control** — init, query, rename, remove, factory reset, Wi-Fi strength, sub-devices.
+- **Smart locks** — BLE/Wi-Fi unlock, dynamic passwords, Matter device control.
+- **Cameras / IPC** — list devices, live stream view, capabilities, alerts, DP configs.
+
+A complete, runnable demo of most of the above lives in [`example/`](example/) — start there if you'd rather read working code than API docs.
+
 ---
 ## 📑 Table of Contents
 
@@ -73,7 +88,7 @@ use_frameworks! :linkage => :static
 #use_modular_headers!
 ```
 
-5. **Update pubspec.yaml**: Add the Tuya Flutter plugin to your `pubspec.yaml` under dev dependencies:
+5. **Update pubspec.yaml**: Add the Tuya Flutter plugin to your `pubspec.yaml` dependencies:
 
 ```yaml
 dependencies:
@@ -193,10 +208,10 @@ android:name=".MainApplication"
 In the same folder as MainActivity.kt add a new file MainApplication.kt and include the below code
 
 ```kotlin
-package ******
+package com.example.your_app // use your app's own applicationId here
 
 import android.app.Application
-        import com.facebook.drawee.backends.pipeline.Fresco
+import com.facebook.drawee.backends.pipeline.Fresco
 
 class MainApplication : Application() {
   override fun onCreate() {
@@ -1201,8 +1216,9 @@ try {
       final alerts =
       await FlutterTuyaSdk.getDeviceDpConfigs(deviceId: _selectedDeviceId!);
       print("← Found ${alerts.length} getDeviceDpConfigs.");
-      for (var a in alerts){
+      for (var a in alerts) {
         print(a);
+      }
     } catch (e) {
       print("⛔ getDeviceDpConfigs error: $e");
     }
@@ -1225,26 +1241,16 @@ try {
 
 ## 📬 Contact Us
 
-Designed and developed by **Omega Kwanga** for [KPMSG](https://kpmsg.com/).
+Maintained by **Waleed Ashraf**.
 
-- 📱 Request the **Example (Demo) App**: [Submit form here](https://kpmsg.com/tuya-sdk/)
-- ✉️ [Email Support](mailto:support@kpmsg.com)
-
-#### Connect with Omega
-[![GitHub Profile](https://cdn-icons-png.flaticon.com/128/733/733553.png)](https://github.com/omegaballa4660)
-[![LinkedIn Profile](https://cdn-icons-png.flaticon.com/128/3536/3536505.png)](https://linkedin.com/in/omegaballa)
+- 🐛 Report an issue or request a feature: [GitHub Issues](https://github.com/waleed750/flutter_tuya_sdk/issues)
+- 📦 A runnable example is included with the package at [`example/`](example/).
 
 ---
 
 ## 📜 License
 
 This project is licensed under the **MIT License** — you are free to use, modify, and distribute it with attribution.  
-See the [LICENSE](LICENSE) file for full details. 
+See the [LICENSE](LICENSE) file for full details.
 
----
-
-## 0.0.1
-- Initial release
-- User management (login, register, logout)
-- Home/room/device management
-- Camera & smart lock tests
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
