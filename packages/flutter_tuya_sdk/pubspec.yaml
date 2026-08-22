@@ -3,9 +3,9 @@ description: >
   A Flutter plugin for Tuya Home Automation — providing user, device,
   camera, and smart lock management via Tuya SDKs for iOS and Android.
 version: 0.1.0
-homepage: https://github.com/waleedashraf/flutter_tuya_sdk
-repository: https://github.com/waleedashraf/flutter_tuya_sdk
-issue_tracker: https://github.com/waleedashraf/flutter_tuya_sdk/issues
+homepage: https://github.com/waleed750/flutter_tuya_sdk
+repository: https://github.com/waleed750/flutter_tuya_sdk
+issue_tracker: https://github.com/waleed750/flutter_tuya_sdk/issues
 topics:
   - tuya
   - iot

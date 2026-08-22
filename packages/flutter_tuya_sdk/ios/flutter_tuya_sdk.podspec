@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
 A Flutter plugin for Tuya Home Automation (user + device management).
 This plugin exposes Tuya’s user‒ and device‒management SDKs via MethodChannels.
                        DESC
-  s.homepage         = 'https://github.com/waleedashraf/flutter_tuya_sdk'
+  s.homepage         = 'https://github.com/waleed750/flutter_tuya_sdk'
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Waleed Ashraf' => 'waleed@example.com' }
   s.source           = { :path => '.' }
